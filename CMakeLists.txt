@@ -2,7 +2,7 @@ cmake_minimum_required (VERSION 3.5)
 
 set(CXX_STANDARD 20)
 
-project(Yet-Another-Raytracer)
+project(Yet-Another-Rasterizer)
 
 if (CMAKE_BUILD_TYPE MATCHES Debug)
     add_definitions(-DDEBUG)
