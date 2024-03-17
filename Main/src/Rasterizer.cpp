@@ -11,6 +11,7 @@ YAR::Rasterizer::Rasterizer(uint32_t resX, uint32_t resY)
 
 void YAR::Rasterizer::Render() {
     colorBuffer.FillColor(0xff000000);
+    colorBuffer.FillDepth(std::numeric_limits<float>::max());
 
     YAM::Triangle triangle {
         YAM::Vector3{-0.5f, 0.5f, 0.f},
@@ -22,12 +23,19 @@ void YAR::Rasterizer::Render() {
         YAM::Vector3{0.5f, 0.5f, 0.f},
         YAM::Vector3{0.5f, -0.5f, 0.f},
     };
+    
+    YAM::Triangle triangle3 {
+        YAM::Vector3{-0.3f, 0.0f, -0.5f},
+        YAM::Vector3{0.8f, 0.5f, 0.5f},
+        YAM::Vector3{0.8f, -0.5f, 0.5f},
+    };
 
     Material material {};
     material.SetColor(YAM::Color{0xffff0000});
 
     RenderNDCTriangle(triangle, material);
     RenderNDCTriangle(triangle2, material);
+    // RenderNDCTriangle(triangle3, material);
     
     std::string outputPath = "result.tga";
     YAR::TGAWriter::Write(outputPath, colorBuffer.GetData(), colorBuffer.GetSizeX(), colorBuffer.GetSizeY());
@@ -37,6 +45,7 @@ void YAR::Rasterizer::RenderNDCTriangle(YAM::Triangle tri, Material material) {
     const int32_t sizeX = colorBuffer.GetSizeX(), sizeY = colorBuffer.GetSizeY();
     const int32_t x1 = (tri.posA.x + 1.f) * sizeX * 0.5f, x2 = (tri.posB.x + 1.f) * sizeX * 0.5f, x3 = (tri.posC.x + 1.f) * sizeX * 0.5f;
     const int32_t y1 = (tri.posA.y + 1.f) * sizeY * 0.5f, y2 = (tri.posB.y + 1.f) * sizeY * 0.5f, y3 = (tri.posC.y + 1.f) * sizeY * 0.5f;
+    const float z1 = tri.posA.z, z2 = tri.posB.z, z3 = tri.posC.z;
 
     int32_t xMin = YAM::Algorithms::Min3(x1, x2, x3);
     int32_t yMin = YAM::Algorithms::Min3(y1, y2, y3);
@@ -80,17 +89,23 @@ void YAR::Rasterizer::RenderNDCTriangle(YAM::Triangle tri, Material material) {
                 && (edge3 > 0 || (edge3 >= 0 && tl3))) {
 
                 // Calculate baricentric coordinates
-                float barU = (dy23 * dxs3 + dx32 * dys3) * barUDenominator;
-                float barV = (dy31 * dxs3 + dx13 * dys3) * barVDenominator;
-                float barW = 1.f - barU - barV;
+                const float barU = (dy23 * dxs3 + dx32 * dys3) * barUDenominator;
+                const float barV = (dy31 * dxs3 + dx13 * dys3) * barVDenominator;
+                const float barW = 1.f - barU - barV;
 
-                YAM::Vector3 color1 = YAM::Color{0xffff0000}.ToVector();
-                YAM::Vector3 color2 = YAM::Color{0xff00ff00}.ToVector();
-                YAM::Vector3 color3 = YAM::Color{0xff0000ff}.ToVector();
+                const float screenDepth = colorBuffer.GetDepth(screenX, screenY);
+                const float currentDepth = barU * z1 + barV * z2 + barW * z3;
 
-                YAM::Vector3 pixColor = barU * color1 + barV * color2 + barW * color3;
+                if (currentDepth < screenDepth) {
+                    YAM::Vector3 color1 = YAM::Color{0xffff0000}.ToVector();
+                    YAM::Vector3 color2 = YAM::Color{0xff00ff00}.ToVector();
+                    YAM::Vector3 color3 = YAM::Color{0xff0000ff}.ToVector();
 
-                colorBuffer.SetPix(screenX, screenY, YAM::Color::FromVector(pixColor).hex);
+                    YAM::Vector3 pixColor = barU * color1 + barV * color2 + barW * color3;
+
+                    colorBuffer.SetPix(screenX, screenY, YAM::Color::FromVector(pixColor).hex);
+                    colorBuffer.SetDepth(screenX, screenY, currentDepth);
+                }
             }
         }
     }
