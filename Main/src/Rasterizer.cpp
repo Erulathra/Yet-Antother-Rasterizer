@@ -13,15 +13,21 @@ void YAR::Rasterizer::Render() {
     colorBuffer.FillColor(0xff000000);
 
     YAM::Triangle triangle {
-        YAM::Vector3{-0.8f, -0.3f, 0.f},
+        YAM::Vector3{-0.5f, 0.5f, 0.f},
+        YAM::Vector3{0.5f, -0.5f, 0.f},
+        YAM::Vector3{-0.5f, -0.5f, 0.f},
+    };
+    YAM::Triangle triangle2 {
         YAM::Vector3{-0.5f, 0.5f, 0.f},
         YAM::Vector3{0.5f, 0.5f, 0.f},
+        YAM::Vector3{0.5f, -0.5f, 0.f},
     };
 
     Material material {};
     material.SetColor(YAM::Color{0xffff0000});
 
     RenderNDCTriangle(triangle, material);
+    RenderNDCTriangle(triangle2, material);
     
     std::string outputPath = "result.tga";
     YAR::TGAWriter::Write(outputPath, colorBuffer.GetData(), colorBuffer.GetSizeX(), colorBuffer.GetSizeY());
@@ -53,6 +59,10 @@ void YAR::Rasterizer::RenderNDCTriangle(YAM::Triangle tri, Material material) {
     const int32_t dy23 = y2 - y3;
     const int32_t dy31 = y3 - y1;
 
+    const bool tl1 = (dy12 < 0 || (dy12 == 0 && dx12 > 0));
+    const bool tl2 = (dy23 < 0 || (dy23 == 0 && dx23 > 0));
+    const bool tl3 = (dy31 < 0 || (dy31 == 0 && dx31 > 0));
+
     const float barUDenominator = 1.f / (dy23 * dx13 + dx32 * dy13);
     const float barVDenominator = 1.f / (dy31 * dx23 + dx13 * dy23);
 
@@ -60,10 +70,14 @@ void YAR::Rasterizer::RenderNDCTriangle(YAM::Triangle tri, Material material) {
         for (int32_t screenX = xMin; screenX < xMax; ++screenX) {
             const int32_t dxs3 = screenX - x3;
             const int32_t dys3 = screenY - y3;
-            
-            if (dx12 * (screenY - y1) - dy12 * (screenX - x1) > 0
-                && dx23 * (screenY - y2) - dy23 * (screenX - x2) > 0
-                && dx31 * dys3 - dy31 * dxs3 > 0) {
+
+            float edge1 = dx12 * (screenY - y1) - dy12 * (screenX - x1);
+            float edge2 = dx23 * (screenY - y2) - dy23 * (screenX - x2);
+            float edge3 = dx31 * dys3 - dy31 * dxs3;
+
+            if ((edge1 > 0 || (edge1 >= 0 && tl1))
+                && (edge2 > 0 || (edge2 >= 0 && tl2))
+                && (edge3 > 0 || (edge3 >= 0 && tl3))) {
 
                 // Calculate baricentric coordinates
                 float barU = (dy23 * dxs3 + dx32 * dys3) * barUDenominator;
