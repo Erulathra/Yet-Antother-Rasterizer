@@ -43,20 +43,40 @@ void YAR::Rasterizer::RenderNDCTriangle(YAM::Triangle tri, Material material) {
     yMax = std::min(yMax, sizeY);
 
     const int32_t dx12 = x1 - x2;
+    const int32_t dx13 = x1 - x3;
     const int32_t dx23 = x2 - x3;
     const int32_t dx31 = x3 - x1;
+    const int32_t dx32 = x3 - x2;
     
     const int32_t dy12 = y1 - y2;
+    const int32_t dy13 = y1 - y3;
     const int32_t dy23 = y2 - y3;
     const int32_t dy31 = y3 - y1;
 
+    const float barUDenominator = 1.f / (dy23 * dx13 + dx32 * dy13);
+    const float barVDenominator = 1.f / (dy31 * dx23 + dx13 * dy23);
+
     for (int32_t screenY = yMin; screenY < yMax; ++screenY) {
         for (int32_t screenX = xMin; screenX < xMax; ++screenX) {
+            const int32_t dxs3 = screenX - x3;
+            const int32_t dys3 = screenY - y3;
+            
             if (dx12 * (screenY - y1) - dy12 * (screenX - x1) > 0
                 && dx23 * (screenY - y2) - dy23 * (screenX - x2) > 0
-                && dx31 * (screenY - y3) - dy31 * (screenX - x3) > 0) {
+                && dx31 * dys3 - dy31 * dxs3 > 0) {
 
-                colorBuffer.SetPix(screenX, screenY, material.GetColor().hex);
+                // Calculate baricentric coordinates
+                float barU = (dy23 * dxs3 + dx32 * dys3) * barUDenominator;
+                float barV = (dy31 * dxs3 + dx13 * dys3) * barVDenominator;
+                float barW = 1.f - barU - barV;
+
+                YAM::Vector3 color1 = YAM::Color{0xffff0000}.ToVector();
+                YAM::Vector3 color2 = YAM::Color{0xff00ff00}.ToVector();
+                YAM::Vector3 color3 = YAM::Color{0xff0000ff}.ToVector();
+
+                YAM::Vector3 pixColor = barU * color1 + barV * color2 + barW * color3;
+
+                colorBuffer.SetPix(screenX, screenY, YAM::Color::FromVector(pixColor).hex);
             }
         }
     }
