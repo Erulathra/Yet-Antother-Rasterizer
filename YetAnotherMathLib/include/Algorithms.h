@@ -20,5 +20,11 @@ namespace YAM{
         static flt RandFloat() {
             return rand() / static_cast<flt>(RAND_MAX);
         }
+
+        template <typename T>
+        static T Max3(T a, T b, T c) { return std::max(std::max(a, b), c); }
+        
+        template <typename T>
+        static T Min3(T a, T b, T c) { return std::min(std::min(a, b), c); }
     };
 }

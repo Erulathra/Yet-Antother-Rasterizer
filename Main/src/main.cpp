@@ -1,11 +1,10 @@
 #include "Buffer.h"
+#include "Rasterizer.h"
 #include "TGAWriter.h"
 
 int main(int argc, char* argv[]) {
-    std::string outputPath = "result.tga";
-    YAR::Buffer screenBuffer {256, 256};
-
-    screenBuffer.FillColor(0xff00ffff);
     
-    YAR::TGAWriter::Write(outputPath, screenBuffer.GetData(), screenBuffer.GetSizeX(), screenBuffer.GetSizeY());
+    YAR::Rasterizer rasterizer {64, 64};
+    rasterizer.Render();
+    
 }
