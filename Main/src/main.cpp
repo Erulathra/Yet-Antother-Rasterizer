@@ -1,9 +1,9 @@
-#include "ScreenBuffer.h"
+#include "Buffer.h"
 #include "TGAWriter.h"
 
 int main(int argc, char* argv[]) {
     std::string outputPath = "result.tga";
-    YAR::ScreenBuffer screenBuffer {256, 256};
+    YAR::Buffer screenBuffer {256, 256};
 
     screenBuffer.FillColor(0xff00ffff);
     

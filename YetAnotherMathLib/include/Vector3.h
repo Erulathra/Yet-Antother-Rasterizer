@@ -1,15 +1,14 @@
 #pragma once
 
 #include <cmath>
+#include <Defines.h>
 #include <ostream>
 #include <sstream>
 #include <string>
-#include "Defines.h"
+#include <algorithm>
 
-namespace YAM
-{
-    class Vector3
-    {
+namespace YAM{
+    class Vector3 {
     public:
         flt x;
         flt y;
@@ -17,41 +16,53 @@ namespace YAM
 
         Vector3() : x(0), y(0), z(0) {}
 
-        Vector3(flt x) : x(x), y(x), z(x) {}
+        explicit Vector3(flt x) : x(x), y(x), z(x) {}
 
         Vector3(flt X, flt Y, flt Z) : x(X), y(Y), z(Z) {}
 
-        double Length() const { return std::sqrt(x * x + y * y + z * z); }
-
-        double SquaredLength() const { return x * x + y * y + z * z; }
+        flt Length() const { return std::sqrt(x * x + y * y + z * z); }
+        flt SquaredLength() const { return x * x + y * y + z * z; }
 
         Vector3 Normal() const {
             const double length = this->Length();
-            if (length == 0)
-                return {0.};
+            if (length < SmallNumber)
+                return Vector3{0.};
 
             return *this / length;
         }
 
-        bool IsNear(const Vector3& vector3, flt error) const {
+        Vector3 Sat() const {
+            Vector3 result;
+
+            result.x = std::clamp(x, 0.f, 1.f);
+            result.y = std::clamp(y, 0.f, 1.f);
+            result.z = std::clamp(z, 0.f, 1.f);
+            
+            return result;
+        }
+
+        bool IsNear(const Vector3& vector3, flt error = SmallNumber) const {
             return std::abs(this->Length() - vector3.Length()) < error;
         }
 
-        flt Dot(Vector3 rhs) const { return x * rhs.x + y * rhs.y + z * rhs.z; }
+        flt Dot(const Vector3& rhs) const { return x * rhs.x + y * rhs.y + z * rhs.z; }
+        static flt Dot(const Vector3& a, const Vector3& b) { return a.Dot(b); }
 
-        [[nodiscard]] flt Angle(Vector3 rhs) const {
-            return acos(this->Dot(rhs) / (this->Length() * rhs.Length()));
+        flt Angle(const Vector3& rhs) const { return acos(this->Dot(rhs) / (this->Length() * rhs.Length())); }
+
+        Vector3 Abs() const { return {std::abs(x), std::abs(y), std::abs(z)}; }
+
+        Vector3 Cross(const Vector3& rhs) const {
+            return {
+                this->y * rhs.z - this->z * rhs.y, this->z * rhs.x - this->x * rhs.z,
+                this->x * rhs.y - this->y * rhs.x
+            };
         }
 
-        [[nodiscard]] Vector3 Cross(Vector3 rhs) const {
-            return {this->y * rhs.z - this->z * rhs.y, this->z * rhs.x - this->x * rhs.z,
-                               this->x * rhs.y - this->y * rhs.x};
-        }
+        static Vector3 Cross(const Vector3& a, const Vector3& b) { return a.Cross(b); }
 
-        Vector3& operator=(Vector3 const& another)
-        {
-            if (this == &another)
-            {
+        Vector3& operator=(Vector3 const& another) {
+            if (this == &another) {
                 return *this;
             }
 
@@ -96,8 +107,7 @@ namespace YAM
             return result;
         }
 
-        friend Vector3 operator*(flt scalar, Vector3 vector)
-        {
+        friend Vector3 operator*(flt scalar, const Vector3& vector) {
             return vector * scalar;
         }
 
@@ -120,8 +130,7 @@ namespace YAM
         bool operator<=(const Vector3& rhs) const { return !(rhs < *this); }
         bool operator>=(const Vector3& rhs) const { return !(*this < rhs); }
 
-        friend std::ostream& operator<<(std::ostream& Os, const Vector3& vector3)
-        {
+        friend std::ostream& operator<<(std::ostream& Os, const Vector3& vector3) {
             Os << "[" << vector3.x << "," << vector3.y << "," << vector3.z << "]";
             return Os;
         }
@@ -132,5 +141,4 @@ namespace YAM
             return result.str();
         }
     };
-
 } // namespace SG
