@@ -166,6 +166,11 @@ namespace YAM{
             result << *this;
             return result.str();
         }
+
+        static const Vector3 Up;
+        static const Vector3 Forward;
+        static const Vector3 Right;
+        static const Vector3 Zero;
         
         friend class Vector4;
     };

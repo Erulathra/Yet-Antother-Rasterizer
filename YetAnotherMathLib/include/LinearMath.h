@@ -5,8 +5,7 @@
 #include <ostream>
 #include <cstdint>
 
-#include "spdlog/spdlog.h"
-
+#include "Mat4.h"
 
 namespace YAM{
 #define M_1_180 (1. / 180.)
@@ -98,6 +97,9 @@ namespace YAM{
         Vector3 norB;
         Vector3 norC;
 
+        Triangle()
+            :Triangle(Vector3{0}, Vector3{0}, Vector3{0}) {}
+
         Triangle(const Vector3& posA, const Vector3& posB, const Vector3& posC)
             : Triangle(posA, posB, posC, Vector3{0.f}, Vector3{0.f}, Vector3{0.f}) {}
 
@@ -110,6 +112,17 @@ namespace YAM{
               , norA(norA)
               , norB(norB)
               , norC(norC) {}
+
+        void Apply(const Mat4& transform) {
+            const Vector4 traformedA = transform * Vector4(posA, 1.f);
+            posA = Vector3(traformedA) / traformedA.w;
+
+            const Vector4 traformedB = transform * Vector4(posB, 1.f);
+            posB = Vector3(traformedB) / traformedA.w;
+
+            const Vector4 traformedC = transform * Vector4(posC, 1.f);
+            posC = Vector3(traformedC) / traformedC.w;
+        }
     };
 
     union Color {

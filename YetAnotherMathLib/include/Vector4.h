@@ -12,13 +12,12 @@ namespace YAM{
     class Vector3;
     
     class Vector4 {
-    private:
+    public:
         flt x;
         flt y;
         flt z;
         flt w;
 
-    public:
         Vector4() : x(0), y(0), z(0), w(0) {};
         explicit Vector4(flt x) : x(x), y(x), z(x), w(x) {};
         Vector4(const Vector3& vec3, flt w);

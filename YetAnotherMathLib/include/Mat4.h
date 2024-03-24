@@ -334,10 +334,8 @@ namespace YAM {
 
         static Mat4 Translation(flt x, flt y, flt z) {
             Mat4 result(1);
+            result[3] = Vector4{x, y, z, 1};
 
-            result[{3, 0}] = x;
-            result[{3, 1}] = y;
-            result[{3, 2}] = z;
             return  result;
         }
 
@@ -387,30 +385,30 @@ namespace YAM {
 
         static Mat4 Perspective(flt fov, flt aspect, flt near, flt far) {
             Mat4 result {0};
+
+            const flt f = std::cos(fov / 2.) / std::sin(fov / 2.);
             
-            flt f = std::cos(fov) / std::sin(fov);
-            result[{0, 0}] = f / aspect;
-            result[{1, 1}] = f;
-            result[{2, 2}] = (far + near) / (near - far);
-            result[{3, 2}] = -1.;
-            result[{3, 2}] = 2. * far * near / (near - far);
+            result[0] = Vector4{ f / aspect, 0, 0, 0};
+            result[1] = Vector4{0, f, 0, 0};
+            result[2] = Vector4{0, 0, (far + near) / (near - far), -1.};
+            result[3] = Vector4{0, 0, static_cast<flt>(2.) * far * near / (near - far), 0.};
 
             return result;
         }
 
         static Mat4 LookAt(const Vector3& eye, const Vector3& center, const Vector3& up) {
-            Mat4 result {0};
-            
+            Mat4 result {1};
+
             const Vector3 forward = (center - eye).Normal();
-            const Vector3 left = Vector3::Cross(forward, up);
-            const Vector3 trueUp = Vector3::Cross(left, forward);
+            const Vector3 right = Vector3::Cross(forward, up);
+            const Vector3 trueUp = Vector3::Cross(right, forward);
 
-            result[0] = Vector4{left[0], up[0], -forward[0], 0};
-            result[1] = Vector4{left[1], up[1], -forward[1], 0};
-            result[2] = Vector4{left[2], up[2], -forward[2], 0};
-            result[3] = Vector4{-eye[0], -eye[1], -eye[2], 1};
+            result[0] = Vector4{right.x, trueUp.x, forward.x, 0};
+            result[1] = Vector4{right.y, trueUp.y, forward.y, 0};
+            result[2] = Vector4{right.z, trueUp.z, forward.z, 0};
+            result[3] = Vector4{0., 0., 0., 1.};
 
-            return result;
+            return result * Translation(-eye.x, -eye.y, -eye.z);
         }
         
         Vector4 operator*(const Vector4& vec4) const {

@@ -3,45 +3,35 @@
 #include "Algorithms.h"
 #include "LinearMath.h"
 #include "Material.h"
+#include "Mesh.h"
 #include "TGAWriter.h"
 #include "Vector3.h"
 
 YAR::Rasterizer::Rasterizer(uint32_t resX, uint32_t resY)
-    : colorBuffer(resX, resY) {}
+    : colorBuffer(resX, resY) {
+}
 
-void YAR::Rasterizer::Render() {
-    colorBuffer.FillColor(0xff000000);
+void YAR::Rasterizer::Clear(YAM::Color color) {
+    colorBuffer.FillColor(color.hex);
     colorBuffer.FillDepth(std::numeric_limits<float>::max());
+}
 
-    YAM::Triangle triangle {
-        YAM::Vector3{-0.5f, 0.5f, 0.f},
-        YAM::Vector3{0.5f, -0.5f, 0.f},
-        YAM::Vector3{-1.5f, -0.5f, 0.f},
-    };
-    YAM::Triangle triangle2 {
-        YAM::Vector3{-0.5f, 0.5f, 0.f},
-        YAM::Vector3{0.5f, 0.5f, 0.f},
-        YAM::Vector3{0.5f, -0.5f, 0.f},
-    };
-    
-    YAM::Triangle triangle3 {
-        YAM::Vector3{-0.3f, 0.0f, -0.5f},
-        YAM::Vector3{1.8f, 0.5f, 0.5f},
-        YAM::Vector3{1.2f, -0.5f, 1.5f},
-    };
-
-    Material material {};
-    material.SetColor(YAM::Color{0xffff0000});
-
-    RenderNDCTriangle(triangle, material);
-    RenderNDCTriangle(triangle2, material);
-    RenderNDCTriangle(triangle3, material);
-    
+void YAR::Rasterizer::Write() {
     std::string outputPath = "result.tga";
     YAR::TGAWriter::Write(outputPath, colorBuffer.GetData(), colorBuffer.GetSizeX(), colorBuffer.GetSizeY());
 }
 
-void YAR::Rasterizer::RenderNDCTriangle(YAM::Triangle tri, Material material) {
+void YAR::Rasterizer::Render(Mesh* mesh, Material* material, const YAM::Mat4& transform) {
+    YAM::Triangle triangle {};
+    for (int trisId = 0; trisId < mesh->GetNumTriangles(); ++trisId) {
+        mesh->GetTriangle(trisId,triangle);
+        triangle.Apply(transform);
+        
+        RenderNDCTriangle(triangle, *material);
+    }
+}
+
+void YAR::Rasterizer::RenderNDCTriangle(const YAM::Triangle& tri, const Material& material) {
     const int32_t sizeX = colorBuffer.GetSizeX(), sizeY = colorBuffer.GetSizeY();
     const int32_t x1 = (tri.posA.x + 1.f) * sizeX * 0.5f, x2 = (tri.posB.x + 1.f) * sizeX * 0.5f, x3 = (tri.posC.x + 1.f) * sizeX * 0.5f;
     const int32_t y1 = (tri.posA.y + 1.f) * sizeY * 0.5f, y2 = (tri.posB.y + 1.f) * sizeY * 0.5f, y3 = (tri.posC.y + 1.f) * sizeY * 0.5f;

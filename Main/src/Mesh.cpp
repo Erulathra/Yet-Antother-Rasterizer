@@ -6,23 +6,38 @@
 #include "spdlog/spdlog.h"
 
 namespace YAR{
+    Mesh::Mesh() {}
+
     Mesh::Mesh(const std::string& path) {
         ParseOBJ(path);
+    }
+
+    void Mesh::GetTriangle(uint32_t index, YAM::Triangle& outTriangle) const {
+        uint32_t indiceID = index * 3;
+
+        const uint32_t v1 = vert_indicies[indiceID] - 1;
+        const uint32_t v2 = vert_indicies[indiceID + 1] - 1;
+        const uint32_t v3 = vert_indicies[indiceID + 2] - 1;
+
+        const uint32_t n1 = norm_indicies[indiceID] - 1;
+        const uint32_t n2 = norm_indicies[indiceID + 1] - 1;
+        const uint32_t n3 = norm_indicies[indiceID + 2] - 1;
+
+        outTriangle.posA = verticies[v1];
+        outTriangle.posC = verticies[v2];
+        outTriangle.posB = verticies[v3];
+        
+        outTriangle.norA = verticies[n1];
+        outTriangle.norC = verticies[n2];
+        outTriangle.norB = verticies[n3];
     }
 
     void Mesh::ParseOBJ(const std::string& path) {
         std::ifstream objFile{path};
 
-        std::vector<YAM::Vector3> verticies{};
-        std::vector<uint32_t> vert_indicies{};
-        
-        std::vector<YAM::Vector3> normals{};
-        std::vector<uint32_t> norm_indicies{};
-
         // Parse file
         std::string fileLine;
         while (std::getline(objFile, fileLine)) {
-            
             // skip comments
             if (fileLine[0] == '#') {
                 continue;
@@ -32,7 +47,7 @@ namespace YAR{
             char parameters[30];
 
             std::sscanf(fileLine.c_str(), "%s %[^\t\n]", command, parameters);
-            
+
             if (strcmp(command, "v") == 0) {
                 YAM::Vector3 vertex;
                 std::sscanf(parameters, "%f %f %f", &vertex.x, &vertex.y, &vertex.z);
@@ -49,37 +64,20 @@ namespace YAR{
                 uint32_t n1, n2, n3;
 
                 std::sscanf(parameters,
-                           "%i/%i/%i %i/%i/%i %i/%i/%i",
-                           &v1, &t1, &n1, &v2, &t2, &n2, &v3, &t3, &n3);
+                            "%i/%i/%i %i/%i/%i %i/%i/%i",
+                            &v1, &t1, &n1, &v2, &t2, &n2, &v3, &t3, &n3);
 
                 vert_indicies.push_back(v1);
                 vert_indicies.push_back(v2);
                 vert_indicies.push_back(v3);
-                
+
                 norm_indicies.push_back(n1);
                 norm_indicies.push_back(n2);
                 norm_indicies.push_back(n3);
             }
         }
 
-        // create triangles
-        for (int triangleID = 0; triangleID < (vert_indicies.size() / 3); ++triangleID) {
-            uint32_t indiceID = triangleID * 3;
-            
-            uint32_t v1 = vert_indicies[indiceID] - 1;
-            uint32_t v2 = vert_indicies[indiceID + 1] - 1;
-            uint32_t v3 = vert_indicies[indiceID + 2] - 1;
-            
-            uint32_t n1 = norm_indicies[indiceID] - 1;
-            uint32_t n2 = norm_indicies[indiceID + 1] - 1;
-            uint32_t n3 = norm_indicies[indiceID + 2] - 1;
-            
-            trianges.emplace_back(
-                verticies[v1],verticies[v2],verticies[v3],
-                normals[n1],normals[n2],normals[n3]
-                );
-        }
-        
+
         CalculateBoundingBox(verticies);
     }
 
