@@ -6,6 +6,7 @@
 #include <cmath>
 
 #include "Defines.h"
+#include "Vector4.h"
 
 namespace YAM {
 
@@ -14,7 +15,7 @@ namespace YAM {
         static constexpr uint8_t GRID_SIZE_X = 4;
         static constexpr uint8_t GRID_SIZE_Y = 4;
 
-        std::array<std::array<flt, 4>, 4> grid{};
+        std::array<Vector4, 4> grid{};
 
     public:
         Mat4() : Mat4(0) {}
@@ -38,8 +39,20 @@ namespace YAM {
             }
         }
 
-        flt &operator[](const std::pair<int, int>& coordinates) {
+        flt operator[](const std::pair<int, int>& coordinates) const {
             return grid[coordinates.first][coordinates.second];
+        }
+        
+        flt& operator[](const std::pair<int, int>& coordinates) {
+            return grid[coordinates.first][coordinates.second];
+        }
+        
+        Vector4& operator[](const uint32_t index) {
+            return grid[index];
+        }
+        
+        const Vector4& operator[](const uint32_t index) const {
+            return grid[index];
         }
 
         Mat4 operator-() const {
@@ -298,6 +311,16 @@ namespace YAM {
             return finalResult;
         }
 
+        Mat4 ClearTranslation() const {
+            Mat4 result = *this;
+            
+            result.grid[3][0] = 0;
+            result.grid[3][1] = 0;
+            result.grid[3][2] = 0;
+
+            return result;
+        }
+
         friend std::ostream &operator<<(std::ostream &os, const Mat4 &mat4) {
             for (int i = 0; i < 4; ++i) {
                 os << "[ ";
@@ -310,56 +333,94 @@ namespace YAM {
         }
 
         static Mat4 Translation(flt x, flt y, flt z) {
-            Mat4 Result(1);
+            Mat4 result(1);
 
-            Result[{3, 0}] = x;
-            Result[{3, 1}] = y;
-            Result[{3, 2}] = z;
-            return  Result;
+            result[{3, 0}] = x;
+            result[{3, 1}] = y;
+            result[{3, 2}] = z;
+            return  result;
         }
+
 
         static Mat4 Scale(flt x, flt y, flt z)
         {
-            Mat4 Result(1);
+            Mat4 result(1);
 
-            Result[{0, 0}] = x;
-            Result[{1, 1}] = y;
-            Result[{2, 2}] = z;
-            return  Result;
+            result[{0, 0}] = x;
+            result[{1, 1}] = y;
+            result[{2, 2}] = z;
+            return  result;
         }
 
         static Mat4 RotationX(flt radians)
         {
-            Mat4 Result(1);
+            Mat4 result(1);
 
-            Result[{1, 1}] = std::cos(radians);
-            Result[{2, 1}] = -std::sin(radians);
-            Result[{1, 2}] = std::sin(radians);
-            Result[{2, 2}] = std::cos(radians);
-            return  Result;
+            result[{1, 1}] = std::cos(radians);
+            result[{2, 1}] = -std::sin(radians);
+            result[{1, 2}] = std::sin(radians);
+            result[{2, 2}] = std::cos(radians);
+            return  result;
         }
 
         static Mat4 RotationY(flt radians)
         {
-            Mat4 Result(1);
+            Mat4 result(1);
 
-            Result[{0, 0}] = std::cos(radians);
-            Result[{0, 2}] = std::sin(radians);
-            Result[{2, 0}] = -std::sin(radians);
-            Result[{2, 2}] = std::cos(radians);
-            return  Result;
+            result[{0, 0}] = std::cos(radians);
+            result[{0, 2}] = std::sin(radians);
+            result[{2, 0}] = -std::sin(radians);
+            result[{2, 2}] = std::cos(radians);
+            return  result;
         }
 
         static Mat4 RotationZ(flt radians)
         {
-            Mat4 Result(1);
+            Mat4 result(1);
 
-            Result[{0, 0}] = std::cos(radians);
-            Result[{0, 1}] = -std::sin(radians);
-            Result[{1, 0}] = std::sin(radians);
-            Result[{1, 1}] = std::cos(radians);
-            return  Result;
+            result[{0, 0}] = std::cos(radians);
+            result[{0, 1}] = -std::sin(radians);
+            result[{1, 0}] = std::sin(radians);
+            result[{1, 1}] = std::cos(radians);
+            return  result;
         }
 
+        static Mat4 Perspective(flt fov, flt aspect, flt near, flt far) {
+            Mat4 result {0};
+            
+            flt f = std::cos(fov) / std::sin(fov);
+            result[{0, 0}] = f / aspect;
+            result[{1, 1}] = f;
+            result[{2, 2}] = (far + near) / (near - far);
+            result[{3, 2}] = -1.;
+            result[{3, 2}] = 2. * far * near / (near - far);
+
+            return result;
+        }
+
+        static Mat4 LookAt(const Vector3& eye, const Vector3& center, const Vector3& up) {
+            Mat4 result {0};
+            
+            const Vector3 forward = (center - eye).Normal();
+            const Vector3 left = Vector3::Cross(forward, up);
+            const Vector3 trueUp = Vector3::Cross(left, forward);
+
+            result[0] = Vector4{left[0], up[0], -forward[0], 0};
+            result[1] = Vector4{left[1], up[1], -forward[1], 0};
+            result[2] = Vector4{left[2], up[2], -forward[2], 0};
+            result[3] = Vector4{-eye[0], -eye[1], -eye[2], 1};
+
+            return result;
+        }
+        
+        Vector4 operator*(const Vector4& vec4) const {
+            Vector4 result;
+            result.x = vec4.x * grid[0][0] + vec4.y * grid[1][0] + vec4.z * grid[2][0] + vec4.w * grid[3][0];
+            result.y = vec4.x * grid[0][1] + vec4.y * grid[1][1] + vec4.z * grid[2][1] + vec4.w * grid[3][1];
+            result.z = vec4.x * grid[0][2] + vec4.y * grid[1][2] + vec4.z * grid[2][2] + vec4.w * grid[3][2];
+            result.w = vec4.x * grid[0][3] + vec4.y * grid[1][3] + vec4.z * grid[2][3] + vec4.w * grid[3][3];
+
+            return result;
+        }
     };
 }

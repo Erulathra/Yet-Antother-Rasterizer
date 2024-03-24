@@ -16,7 +16,7 @@ void YAR::Rasterizer::Render() {
     YAM::Triangle triangle {
         YAM::Vector3{-0.5f, 0.5f, 0.f},
         YAM::Vector3{0.5f, -0.5f, 0.f},
-        YAM::Vector3{-0.5f, -0.5f, 0.f},
+        YAM::Vector3{-1.5f, -0.5f, 0.f},
     };
     YAM::Triangle triangle2 {
         YAM::Vector3{-0.5f, 0.5f, 0.f},
@@ -26,8 +26,8 @@ void YAR::Rasterizer::Render() {
     
     YAM::Triangle triangle3 {
         YAM::Vector3{-0.3f, 0.0f, -0.5f},
-        YAM::Vector3{0.8f, 0.5f, 0.5f},
-        YAM::Vector3{0.8f, -0.5f, 0.5f},
+        YAM::Vector3{1.8f, 0.5f, 0.5f},
+        YAM::Vector3{1.2f, -0.5f, 1.5f},
     };
 
     Material material {};
@@ -35,7 +35,7 @@ void YAR::Rasterizer::Render() {
 
     RenderNDCTriangle(triangle, material);
     RenderNDCTriangle(triangle2, material);
-    // RenderNDCTriangle(triangle3, material);
+    RenderNDCTriangle(triangle3, material);
     
     std::string outputPath = "result.tga";
     YAR::TGAWriter::Write(outputPath, colorBuffer.GetData(), colorBuffer.GetSizeX(), colorBuffer.GetSizeY());
@@ -47,10 +47,10 @@ void YAR::Rasterizer::RenderNDCTriangle(YAM::Triangle tri, Material material) {
     const int32_t y1 = (tri.posA.y + 1.f) * sizeY * 0.5f, y2 = (tri.posB.y + 1.f) * sizeY * 0.5f, y3 = (tri.posC.y + 1.f) * sizeY * 0.5f;
     const float z1 = tri.posA.z, z2 = tri.posB.z, z3 = tri.posC.z;
 
-    int32_t xMin = YAM::Algorithms::Min3(x1, x2, x3);
-    int32_t yMin = YAM::Algorithms::Min3(y1, y2, y3);
-    int32_t xMax = YAM::Algorithms::Max3(x1, x2, x3);
-    int32_t yMax = YAM::Algorithms::Max3(y1, y2, y3);
+    int32_t xMin = YAM::Min3(x1, x2, x3);
+    int32_t yMin = YAM::Min3(y1, y2, y3);
+    int32_t xMax = YAM::Max3(x1, x2, x3);
+    int32_t yMax = YAM::Max3(y1, y2, y3);
 
     xMin = std::max(xMin, static_cast<int32_t>(0));
     yMin = std::max(yMin, static_cast<int32_t>(0));

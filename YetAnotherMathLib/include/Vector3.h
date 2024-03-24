@@ -7,6 +7,8 @@
 #include <string>
 #include <algorithm>
 
+#include "Vector4.h"
+
 namespace YAM{
     class Vector3 {
     public:
@@ -20,12 +22,14 @@ namespace YAM{
 
         Vector3(flt X, flt Y, flt Z) : x(X), y(Y), z(Z) {}
 
+        explicit Vector3(const Vector4& vec4);
+        
         flt Length() const { return std::sqrt(x * x + y * y + z * z); }
         flt SquaredLength() const { return x * x + y * y + z * z; }
 
         Vector3 Normal() const {
             const double length = this->Length();
-            if (length < SmallNumber)
+            if (length < SmallFloat)
                 return Vector3{0.};
 
             return *this / length;
@@ -41,7 +45,7 @@ namespace YAM{
             return result;
         }
 
-        bool IsNear(const Vector3& vector3, flt error = SmallNumber) const {
+        bool IsNear(const Vector3& vector3, flt error = SmallFloat) const {
             return std::abs(this->Length() - vector3.Length()) < error;
         }
 
@@ -60,6 +64,10 @@ namespace YAM{
         }
 
         static Vector3 Cross(const Vector3& a, const Vector3& b) { return a.Cross(b); }
+
+        static Vector3 Lerp(const Vector3& a, const Vector3& b, float t) {
+            return a + (b - a) * t;
+        }
 
         Vector3& operator=(Vector3 const& another) {
             if (this == &another) {
@@ -96,6 +104,14 @@ namespace YAM{
             return result;
         }
 
+        Vector3 Mul(const Vector3& another) const {
+            Vector3 result;
+            result.x = this->x * another.x;
+            result.y = this->y * another.y;
+            result.z = this->z * another.z;
+            return result;
+        }
+
         void operator+=(Vector3 const& another) { *this = *this + another; }
         void operator-=(Vector3 const& another) { *this = *this - another; }
 
@@ -117,6 +133,16 @@ namespace YAM{
             result.y = this->y / scalar;
             result.z = this->z / scalar;
             return result;
+        }
+        
+        flt operator[] (const uint8_t index) const {
+            const flt values[] = {x, y, z};
+            return values[index];
+        }
+        
+        flt& operator[] (const uint8_t index) {
+            flt* values[] = {&x, &y, &z};
+            return *values[index];
         }
 
         void operator*=(flt const& scalar) { *this = *this * scalar; }
@@ -140,5 +166,7 @@ namespace YAM{
             result << *this;
             return result.str();
         }
+        
+        friend class Vector4;
     };
 } // namespace SG

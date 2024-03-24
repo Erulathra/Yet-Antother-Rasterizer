@@ -1,30 +1,91 @@
 #pragma once
 
-#include <math.h>
-#include <cstdlib>
+#include <cmath>
+#include <cstdint>
 
 #include "Defines.h"
+#include "LinearMath.h"
+#include "Vector3.h"
 
 namespace YAM{
-    class Algorithms {
+    inline int32_t Min3(int32_t a, int32_t b, int32_t c) {
+        return std::min(a, std::min(b, c));
+    };
+    
+    inline int32_t Max3(int32_t a, int32_t b, int32_t c) {
+        return std::max(a, std::max(b, c));
+    };
+
+    class Random {
+    private:
+        mutable uint32_t seed;
+
     public:
-        static void RandomPointInCircle(flt& x, flt& y) {
-            const flt angle = RandFloat() * 2 * M_PI;
-            x = std::cos(angle);
-            y = std::sin(angle);
+        explicit Random()
+            : Random(time(nullptr)) {}
 
-            x *= std::sqrt(RandFloat());
-            y *= std::sqrt(RandFloat());
+        Random(uint32_t seed) {
+            this->seed = seed;
         }
 
-        static flt RandFloat() {
-            return rand() / static_cast<flt>(RAND_MAX);
+
+        void SetRandomSeed(uint32_t newSeed) const {
+            seed = newSeed;
         }
 
-        template <typename T>
-        static T Max3(T a, T b, T c) { return std::max(std::max(a, b), c); }
-        
-        template <typename T>
-        static T Min3(T a, T b, T c) { return std::min(std::min(a, b), c); }
+        uint32_t RandInt() const {
+            uint32_t z = seed + 0x9e3779b9;
+            z ^= z >> 15; // 16 for murmur3
+            z *= 0x85ebca6b;
+            z ^= z >> 13;
+            z *= 0xc2b2ae35;
+            seed = z ^ (z >> 16);
+            return seed;
+        }
+
+        void RandomPointInCircle(flt& x, flt& y) const {
+            const flt angle = RandFloat() * 2. * M_PI;
+            const flt radius = std::sqrt(RandFloat());
+
+            x = radius * std::cos(angle);
+            y = radius * std::sin(angle);
+        }
+
+        Vector3 RandomHemisphereDirection(const Vector3& normal) const {
+            Vector3 result;
+            result.x = RandFloatNormal();
+            result.y = RandFloatNormal();
+            result.z = RandFloatNormal();
+
+            result = result.Normal();
+
+            if (normal.Dot(result) < 0.f) {
+                return result * -1.f;
+            }
+
+            return result;
+        }
+
+        Vector3 RandomDirection() const {
+            Vector3 result;
+            result.x = RandFloatNormal();
+            result.y = RandFloatNormal();
+            result.z = RandFloatNormal();
+
+            return result.Normal();
+        }
+
+        flt RandFloatNormal() const {
+            const flt theta = 2.f * M_PI * RandFloat();
+            const flt rho = std::sqrt(-2.f * std::log(RandFloat()));
+
+            return rho * std::cos(theta);
+        }
+
+        static constexpr flt one_randMax = 1. / 0xFFFFFFFFU;
+
+        flt RandFloat() const {
+            return static_cast<flt>(RandInt()) * one_randMax;
+        }
     };
 }

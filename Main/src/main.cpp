@@ -4,7 +4,7 @@
 
 int main(int argc, char* argv[]) {
     
-    YAR::Rasterizer rasterizer {64, 64};
+    YAR::Rasterizer rasterizer {512, 512};
     rasterizer.Render();
     
 }

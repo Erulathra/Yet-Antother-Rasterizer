@@ -3,13 +3,23 @@
 #include "Vector3.h"
 #include <cmath>
 #include <ostream>
-#include <vector>
 #include <cstdint>
 
 #include "spdlog/spdlog.h"
 
 
 namespace YAM{
+#define M_1_180 (1. / 180.)
+    static flt ToDeg(flt rad) { return static_cast<flt>(rad * 180. * M_1_PI); }
+    static flt ToRad(flt deg) { return static_cast<flt>(deg * M_PI * M_1_180); }
+    
+    static flt Sign(flt x) {
+        if (x > 0.f) {
+            return 1.f;
+        }
+        return x < SmallFloat ? 0 : -1;
+    }
+
     struct Ray {
         Vector3 direction;
         Vector3 point;
@@ -83,14 +93,13 @@ namespace YAM{
         Vector3 posA;
         Vector3 posB;
         Vector3 posC;
-        
+
         Vector3 norA;
         Vector3 norB;
         Vector3 norC;
-        
-        Triangle( const Vector3& posA, const Vector3& posB, const Vector3& posC)
-            : Triangle(posA, posB, posC, Vector3{0.f}, Vector3{0.f}, Vector3{0.f})
-        {}
+
+        Triangle(const Vector3& posA, const Vector3& posB, const Vector3& posC)
+            : Triangle(posA, posB, posC, Vector3{0.f}, Vector3{0.f}, Vector3{0.f}) {}
 
         Triangle(
             const Vector3& posA, const Vector3& posB, const Vector3& posC,
@@ -100,8 +109,7 @@ namespace YAM{
               , posC(posC)
               , norA(norA)
               , norB(norB)
-              , norC(norC)
-        {}
+              , norC(norC) {}
     };
 
     union Color {
@@ -112,7 +120,7 @@ namespace YAM{
             Color result{};
 
             Vector3 saturatedVec = vector.Sat();
-            
+
             result.bytes[3] = 255;
             result.bytes[2] = 255.f * saturatedVec.x;
             result.bytes[1] = 255.f * saturatedVec.y;
@@ -135,6 +143,11 @@ namespace YAM{
         Vector3 normal;
         flt distance;
     };
+
+    static Vector3 Reflect(const Vector3& dirIn, const Vector3& normal) {
+        return dirIn - 2 * Vector3::Dot(dirIn, normal) * normal;
+    }
+
 
     class LinearMath {
     public:
@@ -164,8 +177,13 @@ namespace YAM{
         }
 
         static bool FindIntersection(const Ray& line, const Plane& plane, Vector3& result) {
+            const float dirDotNormal = line.direction.Dot(plane.normalVector);
+            if (dirDotNormal >= 1.f) {
+                return false;
+            }
+            
             const flt distance = plane.normalVector.Dot(plane.point) * -1.f;
-            const flt t = -(line.point.Dot(plane.normalVector) + distance) / line.direction.Dot(plane.normalVector);
+            const flt t = -(line.point.Dot(plane.normalVector) + distance) / dirDotNormal;
             result = line.point + (line.direction * t);
             return true;
         }
@@ -223,7 +241,7 @@ namespace YAM{
             hitInfo.hitPoint = ray.point + ray.direction * nearestSolution;
             hitInfo.distance = nearestSolution;
             hitInfo.normal = (hitInfo.hitPoint - sphere.center).Normal();
-            
+
             return true;
         }
 
@@ -237,14 +255,14 @@ namespace YAM{
             const Vector3 daRayPoint = Vector3::Cross(aRayPoint, ray.direction);
 
             const flt det = -Vector3::Dot(ray.direction, triangleNormal);
-            if (det < SmallNumber)
+            if (det < SmallFloat)
                 return false;
 
             const flt invDet = 1 / det;
 
             // Calculate distance to triangle
             const flt distance = Vector3::Dot(aRayPoint, triangleNormal) * invDet;
-            if (distance < SmallNumber)
+            if (distance < SmallFloat)
                 return false;
 
             // Calculate baricentric cooridinates
@@ -256,14 +274,13 @@ namespace YAM{
                 hitInfo.hitPoint = ray.point + ray.direction * distance;
                 hitInfo.distance = distance;
                 hitInfo.normal = (tri.norA * barW + tri.norB * barU + tri.norC * barV).Normal();
-                
+
                 return true;
             }
 
-
             return false;
         }
-        
+
         // https://gamedev.stackexchange.com/questions/18436/most-efficient-aabb-vs-ray-collision-algorithms#18459
         static bool FindIntersection(const Ray& ray, const AABB& aabb) {
             const float t1 = (aabb.min.x - ray.point.x) / ray.direction.x;
