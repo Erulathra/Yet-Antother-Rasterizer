@@ -7,6 +7,8 @@
 #include "TGAWriter.h"
 #include "Vector3.h"
 
+
+
 YAR::Rasterizer::Rasterizer(uint32_t resX, uint32_t resY)
     : colorBuffer(resX, resY) {
 }
@@ -21,17 +23,17 @@ void YAR::Rasterizer::Write() {
     YAR::TGAWriter::Write(outputPath, colorBuffer.GetData(), colorBuffer.GetSizeX(), colorBuffer.GetSizeY());
 }
 
-void YAR::Rasterizer::Render(Mesh* mesh, Material* material, const YAM::Mat4& transform) {
+void YAR::Rasterizer::Render( Mesh* mesh, const VertexShader& vertexShader, const PixelShader& pixelShader) {
     YAM::Triangle triangle {};
     for (int trisId = 0; trisId < mesh->GetNumTriangles(); ++trisId) {
         mesh->GetTriangle(trisId,triangle);
-        triangle.Apply(transform);
+        vertexShader(triangle);
         
-        RenderNDCTriangle(triangle, *material);
+        RenderNDCTriangle(triangle, pixelShader);
     }
 }
 
-void YAR::Rasterizer::RenderNDCTriangle(const YAM::Triangle& tri, const Material& material) {
+void YAR::Rasterizer::RenderNDCTriangle(const YAM::Triangle& tri, const PixelShader& pixelShader ) {
     const int32_t sizeX = colorBuffer.GetSizeX(), sizeY = colorBuffer.GetSizeY();
     const int32_t x1 = (tri.posA.x + 1.f) * sizeX * 0.5f, x2 = (tri.posB.x + 1.f) * sizeX * 0.5f, x3 = (tri.posC.x + 1.f) * sizeX * 0.5f;
     const int32_t y1 = (tri.posA.y + 1.f) * sizeY * 0.5f, y2 = (tri.posB.y + 1.f) * sizeY * 0.5f, y3 = (tri.posC.y + 1.f) * sizeY * 0.5f;
@@ -87,11 +89,15 @@ void YAR::Rasterizer::RenderNDCTriangle(const YAM::Triangle& tri, const Material
                 const float currentDepth = barU * z1 + barV * z2 + barW * z3;
 
                 if (currentDepth < screenDepth) {
-                    YAM::Vector3 color1 = YAM::Color{0xffff0000}.ToVector();
-                    YAM::Vector3 color2 = YAM::Color{0xff00ff00}.ToVector();
-                    YAM::Vector3 color3 = YAM::Color{0xff0000ff}.ToVector();
+                    YAM::Vector3 pixColor {0.f};
+                    
+                    YAM::Vector3 interpPosition = barU * tri.posA + barV * tri.posB + barW * tri.posC;
+                    YAM::Vector3 interpNormal = barU * tri.norA + barV * tri.norB + barW * tri.norC;
+                    interpNormal = interpNormal.Normal();
+                    
+                    YAM::Vector3 interpUV {barU, barV, barW}; // TODO:
 
-                    YAM::Vector3 pixColor = barU * color1 + barV * color2 + barW * color3;
+                    pixelShader(pixColor, interpPosition, interpNormal, interpUV);
 
                     colorBuffer.SetPix(screenX, screenY, YAM::Color::FromVector(pixColor).hex);
                     colorBuffer.SetDepth(screenX, screenY, currentDepth);

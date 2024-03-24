@@ -123,6 +123,13 @@ namespace YAM{
             const Vector4 traformedC = transform * Vector4(posC, 1.f);
             posC = Vector3(traformedC) / traformedC.w;
         }
+
+        void TransformNormal (const Mat4& transform) {
+            const YAM::Mat4 normalTranslation = transform.ClearTranslation().Inverse().Transpose();
+            norA = YAM::Vector3(normalTranslation * YAM::Vector4(norA, 1.f));
+            norB = YAM::Vector3(normalTranslation * YAM::Vector4(norB, 1.f));
+            norC = YAM::Vector3(normalTranslation * YAM::Vector4(norC, 1.f));
+        }
     };
 
     union Color {

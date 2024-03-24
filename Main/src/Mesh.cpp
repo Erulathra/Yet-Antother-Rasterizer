@@ -27,9 +27,9 @@ namespace YAR{
         outTriangle.posC = verticies[v2];
         outTriangle.posB = verticies[v3];
         
-        outTriangle.norA = verticies[n1];
-        outTriangle.norC = verticies[n2];
-        outTriangle.norB = verticies[n3];
+        outTriangle.norA = normals[n1];
+        outTriangle.norC = normals[n2];
+        outTriangle.norB = normals[n3];
     }
 
     void Mesh::ParseOBJ(const std::string& path) {
