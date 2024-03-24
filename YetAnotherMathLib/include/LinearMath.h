@@ -118,7 +118,7 @@ namespace YAM{
             posA = Vector3(traformedA) / traformedA.w;
 
             const Vector4 traformedB = transform * Vector4(posB, 1.f);
-            posB = Vector3(traformedB) / traformedA.w;
+            posB = Vector3(traformedB) / traformedB.w;
 
             const Vector4 traformedC = transform * Vector4(posC, 1.f);
             posC = Vector3(traformedC) / traformedC.w;

@@ -390,7 +390,7 @@ namespace YAM {
             
             result[0] = Vector4{ f / aspect, 0, 0, 0};
             result[1] = Vector4{0, f, 0, 0};
-            result[2] = Vector4{0, 0, (far + near) / (near - far), -1.};
+            result[2] = Vector4{0, 0, -(far + near) / (near - far), 1.};
             result[3] = Vector4{0, 0, static_cast<flt>(2.) * far * near / (near - far), 0.};
 
             return result;
