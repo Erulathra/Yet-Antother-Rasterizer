@@ -1,4 +1,4 @@
-#include "CubeMesh.h"
+#include "Meshes/CubeMesh.h"
 
 namespace YAR{
     CubeMesh::CubeMesh(YAM::Vector3 size) {
