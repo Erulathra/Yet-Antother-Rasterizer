@@ -172,6 +172,10 @@ namespace YAM{
         static const Vector3 Right;
         static const Vector3 Zero;
         
+        static const Vector3 Red;
+        static const Vector3 Green;
+        static const Vector3 Blue;
+        
         friend class Vector4;
     };
 } // namespace SG

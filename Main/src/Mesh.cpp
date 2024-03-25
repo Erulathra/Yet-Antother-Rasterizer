@@ -15,13 +15,13 @@ namespace YAR{
     void Mesh::GetTriangle(uint32_t index, YAM::Triangle& outTriangle) const {
         uint32_t indiceID = index * 3;
 
-        const uint32_t v1 = vert_indicies[indiceID] - 1;
-        const uint32_t v2 = vert_indicies[indiceID + 1] - 1;
-        const uint32_t v3 = vert_indicies[indiceID + 2] - 1;
+        const uint32_t v1 = vert_indicies[indiceID];
+        const uint32_t v2 = vert_indicies[indiceID + 1];
+        const uint32_t v3 = vert_indicies[indiceID + 2];
 
-        const uint32_t n1 = norm_indicies[indiceID] - 1;
-        const uint32_t n2 = norm_indicies[indiceID + 1] - 1;
-        const uint32_t n3 = norm_indicies[indiceID + 2] - 1;
+        const uint32_t n1 = norm_indicies[indiceID];
+        const uint32_t n2 = norm_indicies[indiceID + 1];
+        const uint32_t n3 = norm_indicies[indiceID + 2];
 
         outTriangle.posA = verticies[v1];
         outTriangle.posC = verticies[v2];
@@ -67,29 +67,15 @@ namespace YAR{
                             "%i/%i/%i %i/%i/%i %i/%i/%i",
                             &v1, &t1, &n1, &v2, &t2, &n2, &v3, &t3, &n3);
 
-                vert_indicies.push_back(v1);
-                vert_indicies.push_back(v2);
-                vert_indicies.push_back(v3);
+                vert_indicies.push_back(v1 - 1);
+                vert_indicies.push_back(v2 - 1);
+                vert_indicies.push_back(v3 - 1);
 
-                norm_indicies.push_back(n1);
-                norm_indicies.push_back(n2);
-                norm_indicies.push_back(n3);
+                norm_indicies.push_back(n1 - 1);
+                norm_indicies.push_back(n2 - 1);
+                norm_indicies.push_back(n3 - 1);
             }
         }
 
-
-        CalculateBoundingBox(verticies);
-    }
-
-    void Mesh::CalculateBoundingBox(const std::vector<YAM::Vector3>& verticies) {
-        for (const YAM::Vector3& vertex : verticies) {
-            boudingBox.min.x = std::min(boudingBox.min.x, vertex.x);
-            boudingBox.min.y = std::min(boudingBox.min.y, vertex.y);
-            boudingBox.min.z = std::min(boudingBox.min.z, vertex.z);
-
-            boudingBox.max.x = std::max(boudingBox.max.x, vertex.x);
-            boudingBox.max.y = std::max(boudingBox.max.y, vertex.y);
-            boudingBox.max.z = std::max(boudingBox.max.z, vertex.z);
-        }
     }
 } // YAR
