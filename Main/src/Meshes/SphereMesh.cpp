@@ -28,36 +28,41 @@ namespace YAR{
 
         for (uint32_t yy = 0; yy < horiz; ++yy) {
             for (int rr = 0; rr < vert; ++rr) {
-                uint32_t index = (rr + 2 * yy * vert) * 3;
                 
-                vert_indicies[index] = (rr + 1) % vert + yy * vert;
+                uint32_t index = (rr + 2 * yy * vert) * 3;
+                vert_indicies[index + 2] = (rr + 1) % vert + yy * vert;
                 vert_indicies[index + 1] = rr + vert + yy * vert;
-                vert_indicies[index + 2] = (rr + 1) % vert + vert + yy * vert;
+                vert_indicies[index] = (rr + 1) % vert + vert + yy * vert;
 
                 index = (rr + vert + 2 * yy * vert) * 3;
-                vert_indicies[index] = rr + vert + yy * vert;
-                vert_indicies[index+1] = rr + 2 * vert + yy * vert;
-                vert_indicies[index+2] = (rr + 1) % vert + vert + yy * vert;
+                vert_indicies[index + 2] = rr + vert + yy * vert;
+                vert_indicies[index + 1] = rr + 2 * vert + yy * vert;
+                vert_indicies[index] = (rr + 1) % vert + vert + yy * vert;
             }
         }
 
         norm_indicies.insert(norm_indicies.end(), vert_indicies.begin(), vert_indicies.end());
         normals.resize(vSize, YAM::Vector3{0});
 
-        for (uint32_t i = 0; i < tSize * 3; i += 3) {
-            YAM::Vector3 normal =
-                YAM::Vector3::Cross(
-                    verticies[vert_indicies[i + 1]] - verticies[vert_indicies[i]],
-                    verticies[vert_indicies[i + 2]] - verticies[vert_indicies[i]]
-                ).Normal();
-
-            normals[vert_indicies[i]] += normal;
-            normals[vert_indicies[i + 1]] += normal;
-            normals[vert_indicies[i + 2]] += normal;
+        // for (uint32_t i = 0; i < tSize * 3; i += 3) {
+        //     YAM::Vector3 normal =
+        //         YAM::Vector3::Cross(
+        //             verticies[vert_indicies[i + 2]] - verticies[vert_indicies[i]],
+        //             verticies[vert_indicies[i + 1]] - verticies[vert_indicies[i]]
+        //         ).Normal();
+        //
+        //     normals[vert_indicies[i]] += normal;
+        //     normals[vert_indicies[i + 1]] += normal;
+        //     normals[vert_indicies[i + 2]] += normal;
+        // }
+        //
+        // for (YAM::Vector3& normal : normals) {
+        //     normal = -normal.Normal();
+        // }
+        
+        for (uint32_t i = 0; i < norm_indicies.size(); ++i) {
+            normals[norm_indicies[i]] = verticies[norm_indicies[i]].Normal();
         }
 
-        for (YAM::Vector3& normal : normals) {
-            normal = normal.Normal();
-        }
     }
 } // YAR

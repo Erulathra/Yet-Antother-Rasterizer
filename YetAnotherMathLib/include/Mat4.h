@@ -311,16 +311,6 @@ namespace YAM {
             return finalResult;
         }
 
-        Mat4 ClearTranslation() const {
-            Mat4 result = *this;
-            
-            result.grid[3][0] = 0;
-            result.grid[3][1] = 0;
-            result.grid[3][2] = 0;
-
-            return result;
-        }
-
         friend std::ostream &operator<<(std::ostream &os, const Mat4 &mat4) {
             for (int i = 0; i < 4; ++i) {
                 os << "[ ";
@@ -396,12 +386,25 @@ namespace YAM {
             return result;
         }
 
+        static Mat4 Ortho(flt left, flt right, flt bottom, flt top, flt zNear, flt zFar ) {
+            Mat4 result {1};
+
+            result[0][0] = static_cast<flt>(2) / (right - left);
+            result[1][1] = static_cast<flt>(2) / (top - bottom);
+            result[2][2] = - static_cast<flt>(2) / (zFar - zNear);
+            result[3][0] = - (right + left) / (right - left);
+            result[3][1] = - (top + bottom) / (top - bottom);
+            result[3][2] = - (zFar + zNear) / (zFar - zNear);
+            
+            return result;
+        }
+
         static Mat4 LookAt(const Vector3& eye, const Vector3& center, const Vector3& up) {
             Mat4 result {1};
 
             const Vector3 forward = (center - eye).Normal();
-            const Vector3 right = Vector3::Cross(forward, up);
-            const Vector3 trueUp = Vector3::Cross(right, forward);
+            const Vector3 right = Vector3::Cross(forward, up).Normal();
+            const Vector3 trueUp = Vector3::Cross(right, forward).Normal();
 
             result[0] = Vector4{right.x, trueUp.x, forward.x, 0};
             result[1] = Vector4{right.y, trueUp.y, forward.y, 0};

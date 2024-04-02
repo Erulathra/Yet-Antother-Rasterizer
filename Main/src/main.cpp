@@ -1,39 +1,63 @@
+#include "BasicShaderProgram.h"
 #include "Mesh.h"
 #include "Rasterizer.h"
 #include "Meshes/CubeMesh.h"
 #include "Meshes/SphereMesh.h"
 
 int main(int argc, char* argv[]) {
-    YAR::Rasterizer rasterizer {512, 512};
+    YAR::Rasterizer rasterizer{512, 512};
 
     YAR::Material material{};
     material.SetColor({0xffffffff});
 
-    YAM::Mat4 camera = YAM::Mat4{1.f};
-    // camera *= YAM::Mat4::Perspective(YAM::ToRad(60.f), 1.f, 0.01f, 100.f);
-    camera *= YAM::Mat4::LookAt({2.f, 2.f, 2.f}, YAM::Vector3::Zero, YAM::Vector3::Up);
+    std::unique_ptr<YAR::BasicShaderProgram> shaderProgram = std::make_unique<YAR::BasicShaderProgram>();
+    YAR::AmbientLight ambientLight{};
+    shaderProgram->SetAmbientLight(ambientLight);
     
-    // YAR::Mesh mesh{"res/plumber.obj"};
-    // YAR::CubeMesh mesh{YAM::Vector3{1.f}};
-    YAR::SphereMesh mesh{20};
-    YAM::Mat4 transform = camera * (YAM::Mat4::Translation(0.f, 0.f, 0.f) * YAM::Mat4::Scale(0.5f, 0.5f, 0.5f));
+    YAR::DirectionalLight directionalLight;
+    directionalLight.direction = YAM::Vector3{-0, 0, -1}.Normal();
+    directionalLight.diffuseStrength = 0.0f;
+    directionalLight.specularStrenght = 0.0f;
+    shaderProgram->SetDirectionalLight(directionalLight);
     
-    // YAM::Mat4 transform = camera;
-    auto vertexShader = [&transform](YAM::Triangle& triangle) {
-        triangle.Apply(transform);
-    };
+    YAR::PointLight pointLight{};
+    pointLight.position = YAM::Vector3{1.f, 0.f, 1.f};
+    pointLight.lightColor = {1.f, 0.f, 0.f};
     
-    YAM::Vector3 sun {-1, -1, -1};
-    sun = sun.Normal();
-    
-    auto pixelShader = [&sun](YAM::Vector3& outColor, const YAM::Vector3& pos, const YAM::Vector3& nor, const YAM::Vector3& uv) {
-        const float lambert = std::max(0.f, nor.Dot(-sun));
-        const float ambient = 0.1f;
-        outColor = YAM::Vector3{1.f} * std::min(1.f, lambert + ambient);
-        // outColor = uv.x * YAM::Vector3::Red + uv.y * YAM::Vector3::Green + uv.z * YAM::Vector3::Blue;
-    };
+    YAR::PointLight pointLight1{};
+    pointLight1.position = YAM::Vector3{-1.f, 0.f, 1.f};
+    pointLight1.lightColor = {0.f, 0.f, 1.f};
 
+    shaderProgram->AddPointLight(pointLight);
+    shaderProgram->AddPointLight(pointLight1);
+
+    shaderProgram->SetProjection(YAM::Mat4::Perspective(YAM::ToRad(60.f), 1.f, 0.01f, 100.f));
+    shaderProgram->SetView(YAM::Mat4::LookAt({0.f, 0.f, 6.f}, YAM::Vector3::Zero, YAM::Vector3::Up));
+    
     rasterizer.Clear();
-    rasterizer.Render(&mesh, vertexShader, pixelShader);
+
+    YAR::Mesh mesh{"res/plumber.obj"};
+    YAM::Mat4 model = (YAM::Mat4::Translation(0.f, 0.f, 0.f) * YAM::Mat4::Scale(0.5f, 0.5f, 0.5f));
+    shaderProgram->SetModel(model);
+    rasterizer.Render(&mesh, shaderProgram.get());
+
+    YAR::SphereMesh sphereMesh(12);
+    model = YAM::Mat4::Translation(2,-2, 0) * YAM::Mat4::Scale(0.5, 0.5, 0.5);
+    shaderProgram->SetModel(model);
+    rasterizer.Render(&sphereMesh, shaderProgram.get());
+    
+    model = YAM::Mat4::Translation(-2,2, 0) * YAM::Mat4::Scale(0.5, 0.5, 0.5);
+    shaderProgram->SetModel(model);
+    rasterizer.Render(&sphereMesh, shaderProgram.get());
+    
+    YAR::Mesh sphereObj{"res/sphere.obj"};
+    model = YAM::Mat4::Translation(-2,-2, 0) * YAM::Mat4::Scale(0.5, 0.5, 0.5);
+    shaderProgram->SetModel(model);
+    rasterizer.Render(&sphereObj, shaderProgram.get());
+    
+    model = YAM::Mat4::Translation(2,2, 0) * YAM::Mat4::Scale(0.5, 0.5, 0.5);
+    shaderProgram->SetModel(model);
+    rasterizer.Render(&sphereObj, shaderProgram.get());
+    
     rasterizer.Write();
 }

@@ -19,6 +19,10 @@ namespace YAM{
         return x < SmallFloat ? 0 : -1;
     }
 
+    static flt Sat(flt x) {
+        return std::min(1.f, std::max(0.f, x));
+    }
+
     struct Ray {
         Vector3 direction;
         Vector3 point;
@@ -124,11 +128,10 @@ namespace YAM{
             posC = Vector3(traformedC) / traformedC.w;
         }
 
-        void TransformNormal (const Mat4& transform) {
-            const YAM::Mat4 normalTranslation = transform.ClearTranslation().Inverse().Transpose();
-            norA = YAM::Vector3(normalTranslation * YAM::Vector4(norA, 1.f));
-            norB = YAM::Vector3(normalTranslation * YAM::Vector4(norB, 1.f));
-            norC = YAM::Vector3(normalTranslation * YAM::Vector4(norC, 1.f));
+        void TransformNormal (const Mat4& invModel) {
+            norA = YAM::Vector3(invModel * YAM::Vector4(norA, 1.f));
+            norB = YAM::Vector3(invModel * YAM::Vector4(norB, 1.f));
+            norC = YAM::Vector3(invModel * YAM::Vector4(norC, 1.f));
         }
     };
 

@@ -2,12 +2,10 @@
 
 #include "Algorithms.h"
 #include "LinearMath.h"
-#include "Material.h"
 #include "Mesh.h"
 #include "TGAWriter.h"
 #include "Vector3.h"
-
-
+#include "ShaderProgram.h"
 
 YAR::Rasterizer::Rasterizer(uint32_t resX, uint32_t resY)
     : colorBuffer(resX, resY) {
@@ -19,21 +17,22 @@ void YAR::Rasterizer::Clear(YAM::Color color) {
 }
 
 void YAR::Rasterizer::Write() {
-    std::string outputPath = "result.tga";
+    std::string outputPath = "res/output/result.tga";
     YAR::TGAWriter::Write(outputPath, colorBuffer.GetData(), colorBuffer.GetSizeX(), colorBuffer.GetSizeY());
 }
 
-void YAR::Rasterizer::Render( Mesh* mesh, const VertexShader& vertexShader, const PixelShader& pixelShader) {
+void YAR::Rasterizer::Render( Mesh* mesh, const ShaderProgram* shaderProgram) {
     YAM::Triangle triangle {};
+
     for (int trisId = 0; trisId < mesh->GetNumTriangles(); ++trisId) {
         mesh->GetTriangle(trisId,triangle);
-        vertexShader(triangle);
+        shaderProgram->VertexShader(triangle);
         
-        RenderNDCTriangle(triangle, pixelShader);
+        RenderNDCTriangle(triangle, shaderProgram);
     }
 }
 
-void YAR::Rasterizer::RenderNDCTriangle(const YAM::Triangle& tri, const PixelShader& pixelShader ) {
+void YAR::Rasterizer::RenderNDCTriangle(const YAM::Triangle& tri, const ShaderProgram* shaderProgram ) {
     const int32_t sizeX = colorBuffer.GetSizeX(), sizeY = colorBuffer.GetSizeY();
     const int32_t x1 = (tri.posA.x + 1.f) * sizeX * 0.5f, x2 = (tri.posB.x + 1.f) * sizeX * 0.5f, x3 = (tri.posC.x + 1.f) * sizeX * 0.5f;
     const int32_t y1 = (tri.posA.y + 1.f) * sizeY * 0.5f, y2 = (tri.posB.y + 1.f) * sizeY * 0.5f, y3 = (tri.posC.y + 1.f) * sizeY * 0.5f;
@@ -97,7 +96,7 @@ void YAR::Rasterizer::RenderNDCTriangle(const YAM::Triangle& tri, const PixelSha
                     
                     YAM::Vector3 interpUV {barU, barV, barW}; // TODO:
 
-                    pixelShader(pixColor, interpPosition, interpNormal, interpUV);
+                    shaderProgram->PixelShader(pixColor, interpPosition, interpNormal, interpUV);
 
                     colorBuffer.SetPix(screenX, screenY, YAM::Color::FromVector(pixColor).hex);
                     colorBuffer.SetDepth(screenX, screenY, currentDepth);
