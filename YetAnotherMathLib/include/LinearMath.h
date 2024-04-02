@@ -100,22 +100,33 @@ namespace YAM{
         Vector3 norA;
         Vector3 norB;
         Vector3 norC;
+        
+        Vector3 uvA;
+        Vector3 uvB;
+        Vector3 uvC;
 
         Triangle()
             :Triangle(Vector3{0}, Vector3{0}, Vector3{0}) {}
 
         Triangle(const Vector3& posA, const Vector3& posB, const Vector3& posC)
-            : Triangle(posA, posB, posC, Vector3{0.f}, Vector3{0.f}, Vector3{0.f}) {}
+            : Triangle(
+                posA, posB, posC,
+                Vector3{0.f}, Vector3{0.f}, Vector3{0.f},
+                Vector3{0.f}, Vector3{0.f}, Vector3{0.f}) {}
 
         Triangle(
             const Vector3& posA, const Vector3& posB, const Vector3& posC,
-            const Vector3& norA, const Vector3& norB, const Vector3& norC)
+            const Vector3& norA, const Vector3& norB, const Vector3& norC,
+            const Vector3& uvA, const Vector3& uvB, const Vector3& uvC)
             : posA(posA)
               , posB(posB)
               , posC(posC)
               , norA(norA)
               , norB(norB)
-              , norC(norC) {}
+              , norC(norC)
+              , uvA(uvA)
+              , uvB(uvB)
+              , uvC(uvC) {}
 
         void Apply(const Mat4& transform) {
             const Vector4 traformedA = transform * Vector4(posA, 1.f);
@@ -129,9 +140,9 @@ namespace YAM{
         }
 
         void TransformNormal (const Mat4& invModel) {
-            norA = YAM::Vector3(invModel * YAM::Vector4(norA, 1.f));
-            norB = YAM::Vector3(invModel * YAM::Vector4(norB, 1.f));
-            norC = YAM::Vector3(invModel * YAM::Vector4(norC, 1.f));
+            norA = YAM::Vector3(invModel * YAM::Vector4(norA, 1.f)).Normal();
+            norB = YAM::Vector3(invModel * YAM::Vector4(norB, 1.f)).Normal();
+            norC = YAM::Vector3(invModel * YAM::Vector4(norC, 1.f)).Normal();
         }
     };
 

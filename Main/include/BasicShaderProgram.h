@@ -1,4 +1,5 @@
 #pragma once
+#include <memory>
 #include <vector>
 
 #include "Lights.h"
@@ -6,6 +7,7 @@
 #include "ShaderProgram.h"
 
 namespace YAR {
+    class Texture;
 
 class BasicShaderProgram : public ShaderProgram {
     YAM::Mat4 model;
@@ -20,6 +22,8 @@ class BasicShaderProgram : public ShaderProgram {
     AmbientLight ambientLight;
     DirectionalLight directionalLight;
     std::vector<PointLight> pointLights;
+
+    std::shared_ptr<Texture> texture;
 public:
     void PreProcess() override;
     
@@ -33,6 +37,8 @@ public:
     void SetAmbientLight(const AmbientLight& newAmbientLight) { ambientLight = newAmbientLight; }
     void SetDirectionalLight(const DirectionalLight& newDirectionalLight) { directionalLight = newDirectionalLight; }
     void AddPointLight(const PointLight& newPointLight) { pointLights.push_back(newPointLight); }
+
+    void SetTexture(const std::shared_ptr<Texture>& newTexture) { texture = newTexture; }
 };
 
 } // YAR

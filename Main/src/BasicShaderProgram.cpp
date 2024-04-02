@@ -1,6 +1,7 @@
 #include "BasicShaderProgram.h"
 
 #include "LinearMath.h"
+#include "Texture.h"
 
 namespace YAR {
     void BasicShaderProgram::PreProcess() {
@@ -43,7 +44,12 @@ namespace YAR {
             calculateLight(&light, lightDir);
         }
         
-        outColor = ambient + lightColor;
+        YAM::Vector3 objColor {1.f};
+        if (texture) {
+            objColor = texture->Sample(uv).ToVector();
+        }
+        
+        outColor = (ambient + lightColor).Mul(objColor);
         outColor = outColor.Sat();
     }
 } // YAR

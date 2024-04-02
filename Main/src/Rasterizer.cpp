@@ -94,7 +94,7 @@ void YAR::Rasterizer::RenderNDCTriangle(const YAM::Triangle& tri, const ShaderPr
                     YAM::Vector3 interpNormal = barU * tri.norA + barV * tri.norB + barW * tri.norC;
                     interpNormal = interpNormal.Normal();
                     
-                    YAM::Vector3 interpUV {barU, barV, barW}; // TODO:
+                    YAM::Vector3 interpUV = barU * tri.uvA + barV * tri.uvB + barW * tri.uvC;
 
                     shaderProgram->PixelShader(pixColor, interpPosition, interpNormal, interpUV);
 

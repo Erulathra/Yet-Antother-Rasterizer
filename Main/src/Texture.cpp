@@ -9,7 +9,7 @@ YAR::Texture::Texture(const std::string& path): sizeX(0), sizeY(0) {
 }
 
 YAM::Color YAR::Texture::Sample(const YAM::Vector3& UV) const {
-    const uint32_t hex = GetPix(std::round(UV.x * sizeX), std::round(UV.y * sizeY));
+    const uint32_t hex = GetPix(std::round(UV.x * sizeX), std::round(sizeY - UV.y * sizeY));
     return {hex};
 }
 

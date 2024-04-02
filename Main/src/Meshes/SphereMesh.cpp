@@ -11,6 +11,7 @@ namespace YAR{
         const uint32_t tSize = 2 * vert * horiz;
 
         verticies.resize(vSize);
+        uvs.resize(vSize);
 
         for (uint32_t yy = 0; yy <= horiz + 1; ++yy) {
             const float y = std::cos(static_cast<float>(yy) * static_cast<float>(M_PI) / (horiz + 1.f));
@@ -21,6 +22,7 @@ namespace YAR{
                 const float z = r * std::sin(2.f * M_PI * rr / vert);
 
                 verticies[rr + yy * vert] = YAM::Vector3{x, y, z};
+                uvs[rr + yy * vert] = YAM::Vector3{yy / (horiz + 1.f) , rr / (vert + 1.f), 0.f};
             }
         }
 
@@ -41,28 +43,13 @@ namespace YAR{
             }
         }
 
+        uv_indicies.insert(norm_indicies.end(), vert_indicies.begin(), vert_indicies.end());
         norm_indicies.insert(norm_indicies.end(), vert_indicies.begin(), vert_indicies.end());
         normals.resize(vSize, YAM::Vector3{0});
 
-        // for (uint32_t i = 0; i < tSize * 3; i += 3) {
-        //     YAM::Vector3 normal =
-        //         YAM::Vector3::Cross(
-        //             verticies[vert_indicies[i + 2]] - verticies[vert_indicies[i]],
-        //             verticies[vert_indicies[i + 1]] - verticies[vert_indicies[i]]
-        //         ).Normal();
-        //
-        //     normals[vert_indicies[i]] += normal;
-        //     normals[vert_indicies[i + 1]] += normal;
-        //     normals[vert_indicies[i + 2]] += normal;
-        // }
-        //
-        // for (YAM::Vector3& normal : normals) {
-        //     normal = -normal.Normal();
-        // }
-        
-        for (uint32_t i = 0; i < norm_indicies.size(); ++i) {
-            normals[norm_indicies[i]] = verticies[norm_indicies[i]].Normal();
+        for (const uint32_t& indice : norm_indicies) {
+            normals[indice] = verticies[indice].Normal();
         }
-
+        
     }
 } // YAR

@@ -1,6 +1,7 @@
 #include "BasicShaderProgram.h"
 #include "Mesh.h"
 #include "Rasterizer.h"
+#include "Texture.h"
 #include "Meshes/CubeMesh.h"
 #include "Meshes/SphereMesh.h"
 
@@ -16,8 +17,8 @@ int main(int argc, char* argv[]) {
     
     YAR::DirectionalLight directionalLight;
     directionalLight.direction = YAM::Vector3{-0, 0, -1}.Normal();
-    directionalLight.diffuseStrength = 0.0f;
-    directionalLight.specularStrenght = 0.0f;
+    directionalLight.diffuseStrength = 0.5f;
+    directionalLight.specularStrenght = 0.5f;
     shaderProgram->SetDirectionalLight(directionalLight);
     
     YAR::PointLight pointLight{};
@@ -35,13 +36,15 @@ int main(int argc, char* argv[]) {
     shaderProgram->SetView(YAM::Mat4::LookAt({0.f, 0.f, 6.f}, YAM::Vector3::Zero, YAM::Vector3::Up));
     
     rasterizer.Clear();
-
+    
+    YAM::Mat4 model;
+    
     YAR::Mesh mesh{"res/plumber.obj"};
-    YAM::Mat4 model = (YAM::Mat4::Translation(0.f, 0.f, 0.f) * YAM::Mat4::Scale(0.5f, 0.5f, 0.5f));
+    model = (YAM::Mat4::Translation(0.f, 0.f, 0.f) * YAM::Mat4::Scale(0.5f, 0.5f, 0.5f));
     shaderProgram->SetModel(model);
     rasterizer.Render(&mesh, shaderProgram.get());
-
-    YAR::SphereMesh sphereMesh(12);
+    
+    YAR::SphereMesh sphereMesh(16);
     model = YAM::Mat4::Translation(2,-2, 0) * YAM::Mat4::Scale(0.5, 0.5, 0.5);
     shaderProgram->SetModel(model);
     rasterizer.Render(&sphereMesh, shaderProgram.get());
@@ -55,8 +58,10 @@ int main(int argc, char* argv[]) {
     shaderProgram->SetModel(model);
     rasterizer.Render(&sphereObj, shaderProgram.get());
     
-    model = YAM::Mat4::Translation(2,2, 0) * YAM::Mat4::Scale(0.5, 0.5, 0.5);
+    model = YAM::Mat4::Translation(2,2, 0) * YAM::Mat4::RotationY(YAM::ToRad(90.f)) * YAM::Mat4::Scale(1.f, 1.f, 1.f);
     shaderProgram->SetModel(model);
+    std::shared_ptr<YAR::Texture> texture = std::make_shared<YAR::Texture>("res/textures/cat.png");
+    shaderProgram->SetTexture(texture);
     rasterizer.Render(&sphereObj, shaderProgram.get());
     
     rasterizer.Write();

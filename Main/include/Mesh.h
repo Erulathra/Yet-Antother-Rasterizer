@@ -14,6 +14,9 @@ protected:
     
     std::vector<YAM::Vector3> normals{};
     std::vector<uint32_t> norm_indicies{};
+    
+    std::vector<YAM::Vector3> uvs{};
+    std::vector<uint32_t> uv_indicies{};
 protected:
     Mesh();
     
