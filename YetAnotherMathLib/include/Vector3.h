@@ -58,7 +58,8 @@ namespace YAM{
 
         Vector3 Cross(const Vector3& rhs) const {
             return {
-                this->y * rhs.z - this->z * rhs.y, this->z * rhs.x - this->x * rhs.z,
+                this->y * rhs.z - this->z * rhs.y,
+                this->z * rhs.x - this->x * rhs.z,
                 this->x * rhs.y - this->y * rhs.x
             };
         }

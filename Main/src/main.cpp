@@ -5,6 +5,7 @@
 #include "Meshes/ConeMesh.h"
 #include "Meshes/CubeMesh.h"
 #include "Meshes/SphereMesh.h"
+#include "Meshes/TorusMesh.h"
 
 int main(int argc, char* argv[]) {
     YAR::Rasterizer rasterizer{512, 512};
@@ -46,7 +47,7 @@ int main(int argc, char* argv[]) {
     rasterizer.Render(&mesh, shaderProgram.get());
     
     YAR::ConeMesh ConeMesh(1.f, 2.f, 6);
-    model = YAM::Mat4::Translation(2,-2, 0) * YAM::Mat4::RotationX(YAM::ToRad(-45.f)) * YAM::Mat4::Scale(0.5, 0.5, 0.5);
+    model = YAM::Mat4::Translation(2,-2, 0) * YAM::Mat4::RotationZ(YAM::ToRad(-0.f)) * YAM::Mat4::Scale(0.5, 0.5, 0.5);
     shaderProgram->SetModel(model);
     rasterizer.Render(&ConeMesh, shaderProgram.get());
     
@@ -55,16 +56,17 @@ int main(int argc, char* argv[]) {
     shaderProgram->SetModel(model);
     rasterizer.Render(&sphereMesh, shaderProgram.get());
     
-    YAR::Mesh sphereObj{"res/cube.obj"};
-    model = YAM::Mat4::Translation(-2,-2, 0) * YAM::Mat4::Scale(0.5, 0.5, 0.5);
+    YAR::TorusMesh torusMesh(1.f, 0.4f, 8, 16);
+    model = YAM::Mat4::Translation(-2,-2, 0) * YAM::Mat4::RotationY(YAM::ToRad(180)) * YAM::Mat4::Scale(0.5, 0.5, 0.5);
     shaderProgram->SetModel(model);
-    rasterizer.Render(&sphereObj, shaderProgram.get());
+    rasterizer.Render(&torusMesh, shaderProgram.get());
     
+    YAR::Mesh cube{"res/cube.obj"};
     model = YAM::Mat4::Translation(2,2, 0) * YAM::Mat4::RotationY(YAM::ToRad(90.f)) * YAM::Mat4::Scale(1.f, 1.f, 1.f);
     shaderProgram->SetModel(model);
     std::shared_ptr<YAR::Texture> texture = std::make_shared<YAR::Texture>("res/textures/cat.png");
     shaderProgram->SetTexture(texture);
-    rasterizer.Render(&sphereObj, shaderProgram.get());
+    rasterizer.Render(&cube, shaderProgram.get());
     
     rasterizer.Write();
 }

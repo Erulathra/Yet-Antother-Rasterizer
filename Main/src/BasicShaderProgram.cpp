@@ -51,5 +51,6 @@ namespace YAR {
         
         outColor = (ambient + lightColor).Mul(objColor);
         outColor = outColor.Sat();
+        // outColor = nor;
     }
 } // YAR

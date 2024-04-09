@@ -38,9 +38,24 @@ namespace YAR{
 
         norm_indicies.insert(norm_indicies.end(), vert_indicies.begin(), vert_indicies.end());
         normals.resize(segmentsNum + 2, YAM::Vector3{0});
+        
+        for (YAM::Vector3& normal : normals) {
+            normal = YAM::Vector3::Zero;
+        }
 
-        for (const uint32_t& indice : norm_indicies) {
-            normals[indice] = vertices[indice].Normal();
+        for (int i = 0; i < vert_indicies.size(); i += 3) {
+            YAM::Vector3 normal = YAM::Vector3::Cross(
+                (vertices[vert_indicies[i]] - vertices[vert_indicies[i + 1]]),
+                (vertices[vert_indicies[i]] - vertices[vert_indicies[i + 2]])
+                ).Normal();
+
+            normals[vert_indicies[i]] += normal;
+            normals[vert_indicies[i + 1]] += normal;
+            normals[vert_indicies[i + 2]] += normal;
+        }
+
+        for (YAM::Vector3& normal : normals) {
+            normal = normal.Normal();
         }
     }
 }
