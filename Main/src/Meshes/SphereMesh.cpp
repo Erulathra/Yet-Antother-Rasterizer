@@ -10,7 +10,7 @@ namespace YAR{
         const uint32_t vSize = vert * (horiz + 2);
         const uint32_t tSize = 2 * vert * horiz;
 
-        verticies.resize(vSize);
+        vertices.resize(vSize);
         uvs.resize(vSize);
 
         for (uint32_t yy = 0; yy <= horiz + 1; ++yy) {
@@ -21,7 +21,7 @@ namespace YAR{
                 const float x = r * std::cos(2.f * M_PI * static_cast<float>(rr) / vert);
                 const float z = r * std::sin(2.f * M_PI * rr / vert);
 
-                verticies[rr + yy * vert] = YAM::Vector3{x, y, z};
+                vertices[rr + yy * vert] = YAM::Vector3{x, y, z};
                 uvs[rr + yy * vert] = YAM::Vector3{yy / (horiz + 1.f) , rr / (vert + 1.f), 0.f};
             }
         }
@@ -48,7 +48,7 @@ namespace YAR{
         normals.resize(vSize, YAM::Vector3{0});
 
         for (const uint32_t& indice : norm_indicies) {
-            normals[indice] = verticies[indice].Normal();
+            normals[indice] = vertices[indice].Normal();
         }
         
     }

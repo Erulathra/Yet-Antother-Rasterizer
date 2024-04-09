@@ -23,21 +23,28 @@ namespace YAR{
         const uint32_t n2 = norm_indicies[indiceID + 1];
         const uint32_t n3 = norm_indicies[indiceID + 2];
 
-        const uint32_t uv1 = uv_indicies[indiceID];
-        const uint32_t uv2 = uv_indicies[indiceID + 1];
-        const uint32_t uv3 = uv_indicies[indiceID + 2];
-
-        outTriangle.posA = verticies[v1];
-        outTriangle.posC = verticies[v2];
-        outTriangle.posB = verticies[v3];
+        outTriangle.posA = vertices[v1];
+        outTriangle.posC = vertices[v2];
+        outTriangle.posB = vertices[v3];
         
         outTriangle.norA = normals[n1];
         outTriangle.norC = normals[n2];
         outTriangle.norB = normals[n3];
 
-        outTriangle.uvA = uvs[uv1];
-        outTriangle.uvB = uvs[uv3];
-        outTriangle.uvC = uvs[uv2];
+        if (!uv_indicies.empty()) {
+            const uint32_t uv1 = uv_indicies[indiceID];
+            const uint32_t uv2 = uv_indicies[indiceID + 1];
+            const uint32_t uv3 = uv_indicies[indiceID + 2];
+
+            outTriangle.uvA = uvs[uv1];
+            outTriangle.uvB = uvs[uv3];
+            outTriangle.uvC = uvs[uv2];
+        }
+        else {
+            outTriangle.uvA = YAM::Vector3{0};
+            outTriangle.uvB = YAM::Vector3{0};
+            outTriangle.uvC = YAM::Vector3{0};
+        }
     }
 
     void Mesh::ParseOBJ(const std::string& path) {
@@ -60,7 +67,7 @@ namespace YAR{
             if (strcmp(command, "v") == 0) {
                 YAM::Vector3 vertex;
                 std::sscanf(parameters, "%f %f %f", &vertex.x, &vertex.y, &vertex.z);
-                verticies.push_back(vertex);
+                vertices.push_back(vertex);
             }
             if (strcmp(command, "vn") == 0) {
                 YAM::Vector3 normal;

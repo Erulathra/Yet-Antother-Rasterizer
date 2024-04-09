@@ -9,7 +9,7 @@ namespace YAR {
 
 class Mesh {
 protected:
-    std::vector<YAM::Vector3> verticies{};
+    std::vector<YAM::Vector3> vertices{};
     std::vector<uint32_t> vert_indicies{};
     
     std::vector<YAM::Vector3> normals{};

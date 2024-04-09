@@ -2,14 +2,14 @@
 
 namespace YAR{
     CubeMesh::CubeMesh(YAM::Vector3 size) {
-        verticies.push_back(YAM::Vector3{0.5, 0.5, -0.5}.Mul(size));
-        verticies.push_back(YAM::Vector3{0.5, -0.5, -0.5}.Mul(size));
-        verticies.push_back(YAM::Vector3{0.5, 0.5, 0.5}.Mul(size));
-        verticies.push_back(YAM::Vector3{0.5, -0.5, 0.5}.Mul(size));
-        verticies.push_back(YAM::Vector3{-0.5, 0.5, -0.5}.Mul(size));
-        verticies.push_back(YAM::Vector3{-0.5, -0.5, -0.5}.Mul(size));
-        verticies.push_back(YAM::Vector3{-0.5, 0.5, 0.5}.Mul(size));
-        verticies.push_back(YAM::Vector3{-0.5, -0.5, 0.5}.Mul(size));
+        vertices.push_back(YAM::Vector3{0.5, 0.5, -0.5}.Mul(size));
+        vertices.push_back(YAM::Vector3{0.5, -0.5, -0.5}.Mul(size));
+        vertices.push_back(YAM::Vector3{0.5, 0.5, 0.5}.Mul(size));
+        vertices.push_back(YAM::Vector3{0.5, -0.5, 0.5}.Mul(size));
+        vertices.push_back(YAM::Vector3{-0.5, 0.5, -0.5}.Mul(size));
+        vertices.push_back(YAM::Vector3{-0.5, -0.5, -0.5}.Mul(size));
+        vertices.push_back(YAM::Vector3{-0.5, 0.5, 0.5}.Mul(size));
+        vertices.push_back(YAM::Vector3{-0.5, -0.5, 0.5}.Mul(size));
 
         uint32_t vert_indicies[] = {
             4, 2, 0, 

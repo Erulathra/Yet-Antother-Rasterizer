@@ -2,6 +2,7 @@
 #include "Mesh.h"
 #include "Rasterizer.h"
 #include "Texture.h"
+#include "Meshes/ConeMesh.h"
 #include "Meshes/CubeMesh.h"
 #include "Meshes/SphereMesh.h"
 
@@ -44,16 +45,17 @@ int main(int argc, char* argv[]) {
     shaderProgram->SetModel(model);
     rasterizer.Render(&mesh, shaderProgram.get());
     
-    YAR::SphereMesh sphereMesh(16);
-    model = YAM::Mat4::Translation(2,-2, 0) * YAM::Mat4::Scale(0.5, 0.5, 0.5);
+    YAR::ConeMesh ConeMesh(1.f, 2.f, 6);
+    model = YAM::Mat4::Translation(2,-2, 0) * YAM::Mat4::RotationX(YAM::ToRad(-45.f)) * YAM::Mat4::Scale(0.5, 0.5, 0.5);
     shaderProgram->SetModel(model);
-    rasterizer.Render(&sphereMesh, shaderProgram.get());
+    rasterizer.Render(&ConeMesh, shaderProgram.get());
     
+    YAR::SphereMesh sphereMesh(16);
     model = YAM::Mat4::Translation(-2,2, 0) * YAM::Mat4::Scale(0.5, 0.5, 0.5);
     shaderProgram->SetModel(model);
     rasterizer.Render(&sphereMesh, shaderProgram.get());
     
-    YAR::Mesh sphereObj{"res/sphere.obj"};
+    YAR::Mesh sphereObj{"res/cube.obj"};
     model = YAM::Mat4::Translation(-2,-2, 0) * YAM::Mat4::Scale(0.5, 0.5, 0.5);
     shaderProgram->SetModel(model);
     rasterizer.Render(&sphereObj, shaderProgram.get());
