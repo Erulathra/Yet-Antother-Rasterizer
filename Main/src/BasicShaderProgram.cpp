@@ -43,6 +43,15 @@ namespace YAR {
             const YAM::Vector3 lightDir = (light.position - pos).Normal();
             calculateLight(&light, lightDir);
         }
+
+        for (const YAR::SpotLight& light : spotLights) {
+            const YAM::Vector3 vertDir = (light.position - pos).Normal();
+            const float theta = std::acos(YAM::Vector3::Dot(light.direction, vertDir));
+
+            if (theta < light.angle) {
+                calculateLight(&light, lightDir);
+            }
+        }
         
         YAM::Vector3 objColor {1.f};
         if (texture) {

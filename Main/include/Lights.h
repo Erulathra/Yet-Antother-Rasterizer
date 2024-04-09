@@ -1,4 +1,5 @@
 #pragma once
+#include "LinearMath.h"
 #include "Vector3.h"
 
 namespace YAR{
@@ -30,6 +31,17 @@ namespace YAR{
         PointLight()
             : Light()
               , position(YAM::Vector3{0.f}) {}
+    };
+
+    class SpotLight :public PointLight {
+    public:
+        YAM::Vector3 direction;
+        YAM::flt angle;
+
+        SpotLight()
+            : PointLight()
+              , direction(0.f, 0.f, 1.f)
+              , angle(YAM::ToRad(30.f)) {}
     };
     
     struct AmbientLight {

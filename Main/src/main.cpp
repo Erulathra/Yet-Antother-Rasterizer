@@ -31,8 +31,15 @@ int main(int argc, char* argv[]) {
     pointLight1.position = YAM::Vector3{-1.f, 0.f, 1.f};
     pointLight1.lightColor = {0.f, 0.f, 1.f};
 
+    YAR::SpotLight spotLight{};
+    spotLight.direction = YAM::Vector3::Forward;
+    spotLight.angle = YAM::ToRad(2.f);
+    spotLight.position = YAM::Vector3{.65f, .65f, -2.f};
+    spotLight.lightColor = {0.f, 0.8f, 0.f};
+
     shaderProgram->AddPointLight(pointLight);
     shaderProgram->AddPointLight(pointLight1);
+    shaderProgram->AddSpotLight(spotLight);
 
     shaderProgram->SetProjection(YAM::Mat4::Perspective(YAM::ToRad(60.f), 1.f, 0.01f, 100.f));
     shaderProgram->SetView(YAM::Mat4::LookAt({0.f, 0.f, 6.f}, YAM::Vector3::Zero, YAM::Vector3::Up));

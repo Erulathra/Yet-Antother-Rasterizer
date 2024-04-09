@@ -22,6 +22,7 @@ class BasicShaderProgram : public ShaderProgram {
     AmbientLight ambientLight;
     DirectionalLight directionalLight;
     std::vector<PointLight> pointLights;
+    std::vector<SpotLight> spotLights;
 
     std::shared_ptr<Texture> texture;
 public:
@@ -37,6 +38,7 @@ public:
     void SetAmbientLight(const AmbientLight& newAmbientLight) { ambientLight = newAmbientLight; }
     void SetDirectionalLight(const DirectionalLight& newDirectionalLight) { directionalLight = newDirectionalLight; }
     void AddPointLight(const PointLight& newPointLight) { pointLights.push_back(newPointLight); }
+    void AddSpotLight(const SpotLight& newSpotLight) { spotLights.push_back(newSpotLight); }
 
     void SetTexture(const std::shared_ptr<Texture>& newTexture) { texture = newTexture; }
 };
