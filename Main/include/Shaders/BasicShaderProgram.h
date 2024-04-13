@@ -29,7 +29,7 @@ public:
     void PreProcess() override;
     
     void VertexShader(YAM::Triangle& outTriangle) const override;
-    void PixelShader(YAM::Vector3& outColor, const YAM::Vector3& pos, const YAM::Vector3& nor, const YAM::Vector3& uv) const override;
+    void PixelShader(YAM::Vector3& outColor, const YAM::Vector3& pos, const YAM::Vector3& nor, const YAM::Vector3& uv, const YAM::Vector3& col) const override;
 
     void SetModel(const YAM::Mat4& newModel) { model = newModel; PreProcess(); }
     void SetView(const YAM::Mat4& newView) { view = newView; PreProcess(); }

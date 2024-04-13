@@ -1,4 +1,4 @@
-#include "BasicShaderProgram.h"
+#include "Shaders/BasicShaderProgram.h"
 
 #include "LinearMath.h"
 #include "Texture.h"
@@ -19,7 +19,7 @@ namespace YAR {
         outTriangle.TransformNormal(invTransModel);
     }
 
-    void BasicShaderProgram::PixelShader(YAM::Vector3& outColor, const YAM::Vector3& pos, const YAM::Vector3& nor, const YAM::Vector3& uv) const {
+    void BasicShaderProgram::PixelShader(YAM::Vector3& outColor, const YAM::Vector3& pos, const YAM::Vector3& nor, const YAM::Vector3& uv, const YAM::Vector3& col) const {
         // ambient
         const YAM::Vector3 ambient = ambientLight.color * ambientLight.strenght;
         

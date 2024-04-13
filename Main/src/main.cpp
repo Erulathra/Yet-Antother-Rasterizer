@@ -1,9 +1,9 @@
-#include "BasicShaderProgram.h"
+#include "Shaders/BasicShaderProgram.h"
+#include "Shaders/VertexLightingShaderProgram.h"
 #include "Mesh.h"
 #include "Rasterizer.h"
 #include "Texture.h"
 #include "Meshes/ConeMesh.h"
-#include "Meshes/CubeMesh.h"
 #include "Meshes/SphereMesh.h"
 #include "Meshes/TorusMesh.h"
 
@@ -43,6 +43,17 @@ int main(int argc, char* argv[]) {
 
     shaderProgram->SetProjection(YAM::Mat4::Perspective(YAM::ToRad(60.f), 1.f, 0.01f, 100.f));
     shaderProgram->SetView(YAM::Mat4::LookAt({0.f, 0.f, 6.f}, YAM::Vector3::Zero, YAM::Vector3::Up));
+
+    std::unique_ptr<YAR::VertexLightingShaderProgram> vertexShaderProgram = std::make_unique<YAR::VertexLightingShaderProgram>();
+    
+    vertexShaderProgram->SetAmbientLight(ambientLight);
+    vertexShaderProgram->SetDirectionalLight(directionalLight);
+    vertexShaderProgram->AddPointLight(pointLight);
+    vertexShaderProgram->AddPointLight(pointLight1);
+    vertexShaderProgram->AddSpotLight(spotLight);
+
+    vertexShaderProgram->SetProjection(YAM::Mat4::Perspective(YAM::ToRad(60.f), 1.f, 0.01f, 100.f));
+    vertexShaderProgram->SetView(YAM::Mat4::LookAt({0.f, 0.f, 6.f}, YAM::Vector3::Zero, YAM::Vector3::Up));
     
     rasterizer.Clear();
     
@@ -59,19 +70,23 @@ int main(int argc, char* argv[]) {
     rasterizer.Render(&ConeMesh, shaderProgram.get());
     
     YAR::SphereMesh sphereMesh(16);
-    model = YAM::Mat4::Translation(-2,2, 0) * YAM::Mat4::Scale(0.5, 0.5, 0.5);
+    model = YAM::Mat4::Translation(-2,2, 0) * YAM::Mat4::Scale(1.0, 1.0, 1.0);
     shaderProgram->SetModel(model);
     rasterizer.Render(&sphereMesh, shaderProgram.get());
     
-    YAR::TorusMesh torusMesh(1.f, 0.4f, 8, 16);
+    model = YAM::Mat4::Translation(0,2, 0) * YAM::Mat4::Scale(1.0, 1.0, 1.0);
+    vertexShaderProgram->SetModel(model);
+    rasterizer.Render(&sphereMesh, vertexShaderProgram.get());
+    
+    YAR::TorusMesh torusMesh(1.f, 0.4f, 4, 8);
     model = YAM::Mat4::Translation(-2,-2, 0) * YAM::Mat4::RotationY(YAM::ToRad(180)) * YAM::Mat4::Scale(0.5, 0.5, 0.5);
     shaderProgram->SetModel(model);
     rasterizer.Render(&torusMesh, shaderProgram.get());
     
     YAR::Mesh cube{"res/cube.obj"};
-    model = YAM::Mat4::Translation(2,2, 0) * YAM::Mat4::RotationY(YAM::ToRad(90.f)) * YAM::Mat4::Scale(1.f, 1.f, 1.f);
+    model = YAM::Mat4::Translation(2,2, 0) * YAM::Mat4::RotationX(YAM::ToRad(-50.f)) * YAM::Mat4::Scale(1.f, 1.f, 1.f);
     shaderProgram->SetModel(model);
-    std::shared_ptr<YAR::Texture> texture = std::make_shared<YAR::Texture>("res/textures/cat.png");
+    std::shared_ptr<YAR::Texture> texture = std::make_shared<YAR::Texture>("res/textures/checkerboard.jpeg");
     shaderProgram->SetTexture(texture);
     rasterizer.Render(&cube, shaderProgram.get());
     

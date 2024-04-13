@@ -92,11 +92,14 @@ void YAR::Rasterizer::RenderNDCTriangle(const YAM::Triangle& tri, const ShaderPr
                     
                     YAM::Vector3 interpPosition = barU * tri.posA + barV * tri.posB + barW * tri.posC;
                     YAM::Vector3 interpNormal = barU * tri.norA + barV * tri.norB + barW * tri.norC;
+                    YAM::Vector3 interpColor = barU * tri.colorA + barV * tri.colorB + barW * tri.colorC;
                     interpNormal = interpNormal.Normal();
                     
-                    YAM::Vector3 interpUV = barU * tri.uvA + barV * tri.uvB + barW * tri.uvC;
+                    YAM::Vector3 interpUV = barU * tri.uvA / tri.posA.z
+                                          + barV * tri.uvB / tri.posB.z
+                                          + barW * tri.uvC / tri.posC.z;
 
-                    shaderProgram->PixelShader(pixColor, interpPosition, interpNormal, interpUV);
+                    shaderProgram->PixelShader(pixColor, interpPosition, interpNormal, interpUV, interpColor);
 
                     colorBuffer.SetPix(screenX, screenY, YAM::Color::FromVector(pixColor).hex);
                     colorBuffer.SetDepth(screenX, screenY, currentDepth);

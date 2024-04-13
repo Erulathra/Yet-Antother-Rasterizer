@@ -13,6 +13,6 @@ namespace YAR{
         virtual void PreProcess() = 0;
         
         virtual void VertexShader(YAM::Triangle& outTriangle) const = 0;
-        virtual void PixelShader(YAM::Vector3& outColor, const YAM::Vector3& pos, const YAM::Vector3& nor, const YAM::Vector3& uv) const = 0;
+        virtual void PixelShader(YAM::Vector3& outColor, const YAM::Vector3& pos, const YAM::Vector3& nor, const YAM::Vector3& uv, const YAM::Vector3& col) const = 0;
     };
 } // YAR

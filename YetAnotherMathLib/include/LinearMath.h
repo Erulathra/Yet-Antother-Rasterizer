@@ -105,6 +105,10 @@ namespace YAM{
         Vector3 uvB;
         Vector3 uvC;
 
+        Vector3 colorA;
+        Vector3 colorB;
+        Vector3 colorC;
+
         Triangle()
             :Triangle(Vector3{0}, Vector3{0}, Vector3{0}) {}
 
@@ -126,7 +130,10 @@ namespace YAM{
               , norC(norC)
               , uvA(uvA)
               , uvB(uvB)
-              , uvC(uvC) {}
+              , uvC(uvC)
+              , colorA(0.f)
+              , colorB(0.f)
+              , colorC(0.f) {}
 
         void Apply(const Mat4& transform) {
             const Vector4 traformedA = transform * Vector4(posA, 1.f);
